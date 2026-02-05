@@ -384,13 +384,16 @@ function createStickers() {
 }, 5000 + (index * 200));  // ← Changed to 5000
     });
 }
-// ============ ADD SECRET MODE CODE HERE ============
-// ====== SIMPLE SECRET MODE ======
+// ====== FIXED SECRET MODE ======
+let isSecretModeActive = false;
+let typingAnimation = null;
+let lastShakeTime = 0;
+let petalInterval = null;
+
 const secretScreen = document.getElementById('secret-screen');
 const okayBtn = document.getElementById('okay-btn');
 const typedText = document.getElementById('typed-text');
 
-// Only run if elements exist
 if (secretScreen && okayBtn && typedText) {
     
     const secretMessage = `Alright Noor, secret mode unlocked 😼
@@ -403,6 +406,12 @@ Okay done before this gets awkward 😂✌️`;
 
     // Type the message
     function typeMessage() {
+        // Clear any existing typing
+        if (typingAnimation) {
+            clearTimeout(typingAnimation);
+            typingAnimation = null;
+        }
+        
         typedText.innerHTML = '';
         let i = 0;
         
@@ -414,52 +423,122 @@ Okay done before this gets awkward 😂✌️`;
                     typedText.innerHTML += secretMessage[i];
                 }
                 i++;
-                setTimeout(typeChar, 30);
+                typedText.scrollTop = typedText.scrollHeight;
+                typingAnimation = setTimeout(typeChar, 30);
             }
         }
         
         typeChar();
     }
 
+    // Create floating petals
+    function createPetals() {
+        const petalCount = 15;
+        
+        // Clear existing petals
+        const existingPetals = document.querySelectorAll('.petal');
+        existingPetals.forEach(petal => petal.remove());
+        
+        for (let i = 0; i < petalCount; i++) {
+            setTimeout(() => {
+                const petal = document.createElement('div');
+                petal.classList.add('petal');
+                
+                // Random properties
+                petal.style.left = `${Math.random() * 100}%`;
+                petal.style.animationDelay = `${Math.random() * 5}s`;
+                petal.style.animationDuration = `${10 + Math.random() * 10}s`;
+                
+                // Random color (pink shades)
+                const hue = 330 + Math.random() * 20;
+                petal.style.background = `hsla(${hue}, 80%, 70%, 0.7)`;
+                
+                // Random size
+                const size = 10 + Math.random() * 15;
+                petal.style.width = `${size}px`;
+                petal.style.height = `${size}px`;
+                
+                secretScreen.appendChild(petal);
+            }, i * 200);
+        }
+    }
+
     // OK button - go back to intro
     okayBtn.addEventListener('click', function() {
+        isSecretModeActive = false;
+        
+        // Clear animations
+        if (typingAnimation) {
+            clearTimeout(typingAnimation);
+        }
+        
+        // Remove petals
+        const petals = document.querySelectorAll('.petal');
+        petals.forEach(petal => petal.remove());
+        
+        // Hide secret screen
         secretScreen.classList.remove('active');
+        
+        // Return to intro screen
         document.getElementById('intro-screen').classList.add('active');
     });
 
     // Shake detection
-    let lastShake = 0;
-    
     function handleShake(event) {
-        const acc = event.accelerationIncludingGravity;
-        if (!acc) return;
+        if (isSecretModeActive) return;
         
-        const force = Math.abs(acc.x) + Math.abs(acc.y) + Math.abs(acc.z);
-        const now = Date.now();
+        const acceleration = event.accelerationIncludingGravity;
+        if (!acceleration) return;
         
-        if (force > 30 && now - lastShake > 2000) {
-            lastShake = now;
-            
-            // Hide current screen
-            document.querySelector('.screen.active').classList.remove('active');
-            
-            // Show secret screen
-            secretScreen.classList.add('active');
-            
-            // Start typing
-            setTimeout(typeMessage, 300);
+        // Calculate shake force
+        const x = acceleration.x || 0;
+        const y = acceleration.y || 0;
+        const z = acceleration.z || 0;
+        
+        const force = Math.sqrt(x*x + y*y + z*z);
+        const currentTime = Date.now();
+        
+        // More strict shake detection
+        if (force > 25 && (currentTime - lastShakeTime) > 3000) {
+            lastShakeTime = currentTime;
+            activateSecretMode();
         }
     }
 
-    // Add event listener
-    window.addEventListener('devicemotion', handleShake);
+    // Activate secret mode
+    function activateSecretMode() {
+        if (isSecretModeActive) return;
+        
+        isSecretModeActive = true;
+        
+        // Get current active screen
+        const activeScreen = document.querySelector('.screen.active');
+        if (activeScreen) {
+            activeScreen.classList.remove('active');
+        }
+        
+        // Show secret screen
+        secretScreen.classList.add('active');
+        
+        // Create petals
+        createPetals();
+        
+        // Start typing after a delay
+        setTimeout(() => {
+            typeMessage();
+        }, 500);
+    }
+
+    // Add shake event listener
+    if (window.DeviceMotionEvent) {
+        window.addEventListener('devicemotion', handleShake);
+    }
 
     // For testing on desktop (press 'S')
     document.addEventListener('keydown', function(e) {
-        if (e.key === 's' || e.key === 'S') {
-            document.querySelector('.screen.active').classList.remove('active');
-            secretScreen.classList.add('active');
-            setTimeout(typeMessage, 300);
+        if ((e.key === 's' || e.key === 'S') && !isSecretModeActive) {
+            e.preventDefault();
+            activateSecretMode();
         }
     });
 }
