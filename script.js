@@ -385,9 +385,15 @@ function createStickers() {
     });
 }
 // ============ ADD SECRET MODE CODE HERE ============
+// ====== SIMPLE SECRET MODE ======
+const secretScreen = document.getElementById('secret-screen');
+const okayBtn = document.getElementById('okay-btn');
+const typedText = document.getElementById('typed-text');
 
-// Secret message to type out
-const secretMessage = `Alright Noor, secret mode unlocked 😼
+// Only run if elements exist
+if (secretScreen && okayBtn && typedText) {
+    
+    const secretMessage = `Alright Noor, secret mode unlocked 😼
 
 I joke a lot, but genuinely, you're someone who makes things feel easy. Talking to you never feels forced, and that's kinda rare these days.
 
@@ -395,174 +401,67 @@ This site, the jokes, the chaos, all just a dumb little way of saying "Yeah, you
 
 Okay done before this gets awkward 😂✌️`;
 
-// Secret mode variables
-let isSecretModeActive = false;
-let shakeThreshold = 15; // Adjust sensitivity
-let lastShakeTime = 0;
-let minShakeInterval = 2000; // Minimum time between shakes (ms)
-
-// Secret mode DOM elements
-const secretScreen = document.getElementById('secret-screen');
-const okayBtn = document.getElementById('okay-btn');
-const typedText = document.getElementById('typed-text');
-
-// Add event listener for OK button
-if (okayBtn) {
-    okayBtn.addEventListener('click', exitSecretMode);
-}
-
-// Shake detection function
-function handleShake(event) {
-    if (isSecretModeActive) return; // Don't trigger if already in secret mode
-    
-    const acceleration = event.accelerationIncludingGravity;
-    const currentTime = new Date().getTime();
-    
-    // Calculate total acceleration
-    const totalAcceleration = Math.sqrt(
-        acceleration.x * acceleration.x +
-        acceleration.y * acceleration.y +
-        acceleration.z * acceleration.z
-    );
-    
-    // Check if it's a shake (above threshold and enough time since last shake)
-    if (totalAcceleration > shakeThreshold && 
-        (currentTime - lastShakeTime) > minShakeInterval) {
+    // Type the message
+    function typeMessage() {
+        typedText.innerHTML = '';
+        let i = 0;
         
-        lastShakeTime = currentTime;
-        activateSecretMode();
-    }
-}
-
-// Activate secret romantic mode
-function activateSecretMode() {
-    if (isSecretModeActive) return;
-    
-    isSecretModeActive = true;
-    
-    // Get current active screen
-    const currentScreen = document.querySelector('.screen.active');
-    
-    // Create floating petals for romantic effect
-    createRomanticPetals();
-    
-    // Hide current screen
-    if (currentScreen) {
-        currentScreen.classList.remove('active');
-    }
-    
-    // Show secret screen
-    if (secretScreen) {
-        secretScreen.classList.add('active');
-    }
-    
-    // Start typing animation
-    setTimeout(() => {
-        typeSecretMessage();
-    }, 1000);
-}
-
-// Create floating petals
-function createRomanticPetals() {
-    const secretScreenEl = document.getElementById('secret-screen');
-    if (!secretScreenEl) return;
-    
-    for (let i = 0; i < 15; i++) {
-        const petal = document.createElement('div');
-        petal.classList.add('petal');
-        
-        // Randomize properties
-        petal.style.left = `${Math.random() * 100}%`;
-        petal.style.animationDelay = `${Math.random() * 5}s`;
-        petal.style.animationDuration = `${10 + Math.random() * 10}s`;
-        
-        // Randomize color slightly
-        const hue = Math.floor(Math.random() * 20) + 330; // Pink hue range
-        petal.style.background = `hsla(${hue}, 80%, 70%, 0.7)`;
-        
-        // Random size
-        const size = 10 + Math.random() * 15;
-        petal.style.width = `${size}px`;
-        petal.style.height = `${size}px`;
-        
-        secretScreenEl.appendChild(petal);
-    }
-}
-
-// Type the secret message letter by letter
-function typeSecretMessage() {
-    if (!typedText) return;
-    
-    typedText.innerHTML = '';
-    let i = 0;
-    const typingSpeed = 40; // ms per character
-    
-    function typeChar() {
-        if (i < secretMessage.length) {
-            // Handle newlines
-            if (secretMessage.charAt(i) === '\n') {
-                typedText.innerHTML += '<br>';
-            } else {
-                typedText.innerHTML += secretMessage.charAt(i);
+        function typeChar() {
+            if (i < secretMessage.length) {
+                if (secretMessage[i] === '\n') {
+                    typedText.innerHTML += '<br>';
+                } else {
+                    typedText.innerHTML += secretMessage[i];
+                }
+                i++;
+                setTimeout(typeChar, 30);
             }
-            i++;
+        }
+        
+        typeChar();
+    }
+
+    // OK button - go back to intro
+    okayBtn.addEventListener('click', function() {
+        secretScreen.classList.remove('active');
+        document.getElementById('intro-screen').classList.add('active');
+    });
+
+    // Shake detection
+    let lastShake = 0;
+    
+    function handleShake(event) {
+        const acc = event.accelerationIncludingGravity;
+        if (!acc) return;
+        
+        const force = Math.abs(acc.x) + Math.abs(acc.y) + Math.abs(acc.z);
+        const now = Date.now();
+        
+        if (force > 30 && now - lastShake > 2000) {
+            lastShake = now;
             
-            // Scroll to keep text in view
-            typedText.scrollTop = typedText.scrollHeight;
+            // Hide current screen
+            document.querySelector('.screen.active').classList.remove('active');
             
-            // Random slight speed variation for natural feel
-            const speedVariation = typingSpeed + (Math.random() * 20 - 10);
-            setTimeout(typeChar, speedVariation);
+            // Show secret screen
+            secretScreen.classList.add('active');
+            
+            // Start typing
+            setTimeout(typeMessage, 300);
         }
     }
-    
-    typeChar();
-}
 
-// Exit secret mode and return to previous screen
-function exitSecretMode() {
-    isSecretModeActive = false;
-    
-    // Clear petals
-    const petals = document.querySelectorAll('.petal');
-    petals.forEach(petal => {
-        if (petal && petal.parentNode) {
-            petal.remove();
+    // Add event listener
+    window.addEventListener('devicemotion', handleShake);
+
+    // For testing on desktop (press 'S')
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 's' || e.key === 'S') {
+            document.querySelector('.screen.active').classList.remove('active');
+            secretScreen.classList.add('active');
+            setTimeout(typeMessage, 300);
         }
     });
-    
-    // Hide secret screen
-    if (secretScreen) {
-        secretScreen.classList.remove('active');
-    }
-    
-    // Return to intro screen
-    const introScreen = document.getElementById('intro-screen');
-    if (introScreen) {
-        introScreen.classList.add('active');
-    }
-    
-    // Scroll to top
-    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
-
-// For testing on desktop (without accelerometer)
-document.addEventListener('keydown', function(event) {
-    if (event.code === 'Space' && !isSecretModeActive) {
-        event.preventDefault();
-        activateSecretMode();
-    }
-});
-
-// Add shake event listener
-if (window.DeviceMotionEvent) {
-    window.addEventListener('devicemotion', handleShake);
-} else {
-    console.log("DeviceMotion not supported - using spacebar for testing");
-}
-
-// ============ END OF SECRET MODE CODE ============
-
-// Your script should end with this (DON'T DELETE):
-});
+// ====== END SECRET MODE ======
 });
