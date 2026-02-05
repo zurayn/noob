@@ -502,4 +502,53 @@ Okay, stopping here before this gets awkward 😂✌️`;
             }
         });
     }
+    // Secret hint functionality
+const secretHintContainer = document.getElementById('secret-hint-container');
+
+// Function to detect if device is mobile
+function isMobileDevice() {
+    return (('ontouchstart' in window) ||
+           (navigator.maxTouchPoints > 0) ||
+           (navigator.msMaxTouchPoints > 0));
+}
+
+// Update hint based on device
+if (secretHintContainer) {
+    // Wait for YES screen to be shown, then update hint
+    yesScreen.addEventListener('animationstart', function() {
+        // Small delay to ensure content is loaded
+        setTimeout(() => {
+            if (isMobileDevice()) {
+                // Mobile device - show shake hint
+                const hintText = secretHintContainer.querySelector('.secret-hint-desc');
+                if (hintText) {
+                    hintText.innerHTML = "Try shaking your phone for a secret message from Zurayn...";
+                }
+            } else {
+                // Desktop - show keyboard hint
+                const hintText = secretHintContainer.querySelector('.secret-hint-desc');
+                const hintSub = secretHintContainer.querySelector('.secret-hint-sub');
+                if (hintText) {
+                    hintText.innerHTML = "Press the <strong>'S' key</strong> for a secret message from Zurayn...";
+                }
+                if (hintSub) {
+                    hintSub.innerHTML = "(Or just pretend to shake your laptop 😂)";
+                }
+            }
+        }, 1000);
+    });
+    
+    // Also add a desktop-specific hint that appears only on non-mobile
+    if (!isMobileDevice()) {
+        const desktopHint = document.createElement('div');
+        desktopHint.className = 'desktop-hint';
+        desktopHint.innerHTML = `
+            <div style="margin-top: 10px; font-size: 0.85rem; color: #888;">
+                <i class="fas fa-keyboard"></i> Desktop tip: Press 'S' key anytime
+            </div>
+        `;
+        secretHintContainer.querySelector('.secret-hint-text').appendChild(desktopHint);
+        desktopHint.style.display = 'block';
+    }
+}
 });
