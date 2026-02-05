@@ -398,10 +398,10 @@ document.addEventListener('DOMContentLoaded', function() {
         
         const secretMessage = `I joke a lot, but genuinely, you're someone who makes things feel easy hazyyy.
         Talking to you never feels forced, and that's kinda rare these days.
-This site, the jokes, the chaos, all just a dumb little way of saying 
-"Yeah, you matter as a friend" ❤️
+        This site, the jokes, the chaos, all just a dumb little way of saying 
+        "Yeah, you matter as a friend" ❤️
 
-Okay, done before this gets awkward 😂✌️`;
+        Okay, done before this gets awkward 😂✌️`;
         
         // Type message with typing animation
         function typeMessage() {
