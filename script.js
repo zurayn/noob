@@ -20,11 +20,6 @@ document.addEventListener('DOMContentLoaded', function() {
     let noClickCount = 0;
     let isNoButtonMoving = false;
     let noButtonMoveInterval;
-
-    let chatHistory = [];
-let currentStep = 0;
-let userChoices = [];
-let originalNoClickCount = 0;
     
     // Initialize the page
     initPage();
@@ -78,6 +73,20 @@ let originalNoClickCount = 0;
     
     // Handle YES button click
          // ============ INTERACTIVE CHAT STORY SYSTEM ============
+    function handleYesClick() {
+    // Store the current noClickCount from main game
+    originalNoClickCount = noClickCount;
+    
+    // Create heart burst effect
+    createHeartBurst();
+    
+    // Create confetti
+    createConfetti();
+
+    // Show stickers every time - ADD THIS CHECK
+    if (typeof createStickers === 'function') {
+        createStickers();
+    }
 let chatHistory = [];
 let currentStep = 0;
 let userChoices = [];
@@ -254,10 +263,11 @@ const chatStory = {
             typingSpeed: 50
         }
     ]
-};
+}
+        };
 
 // Handle YES button click - NEW VERSION
-function handleYesClick() {
+function Click() {
     // Store the current noClickCount from main game
     originalNoClickCount = noClickCount;
     
@@ -310,6 +320,18 @@ function initChatStory() {
     const optionsContainer = document.getElementById('options-container');
     chatDisplay.innerHTML = '';
     optionsContainer.innerHTML = '';
+
+    if (!chatDisplay || !optionsContainer) {
+        console.error("Chat elements not found!");
+        // Fallback to old YES screen
+        showRatingOverlay();
+        return;
+    }
+    function showRatingOverlay() {
+    // Directly show rating if chat fails
+    document.querySelector('.chat-story-container').style.display = 'none';
+    document.getElementById('rating-overlay').style.display = 'flex';
+}
     
     // Add context message
     addSystemMessage("Ayo fr? You actually clicked YES? 😭❤️");
@@ -329,6 +351,7 @@ function initChatStory() {
 
 // Process a chat step
 function processStep(stepId) {
+    currentStep = stepId; // ADD THIS LINE
     const step = chatStory.steps.find(s => s.id === stepId);
     if (!step) {
         // End of chat - show rating
@@ -1291,39 +1314,6 @@ if (secretHintContainer) {
         desktopHint.style.display = 'block';
     }
 }
-    // ============ INTERACTIVE CHAT STORY SYSTEM ============
 
-// Add the entire chatStory object here
-const chatStory = {
-    steps: [
-        // Step 0 - Initial message
-        {
-            id: 0,
-            type: "zurayn",
-            message: "Is this fr? 👀",
-            delay: 800,
-            typingSpeed: 40
-        },
-        // ... ALL THE STEPS FROM MY CODE
-    ]
-};
-
-// Then add ALL these functions:
-function initChatStory() { ... }
-function processStep(stepId) { ... }
-function addMessage(sender, text, typingSpeed = 40) { ... }
-function addSystemMessage(text) { ... }
-function showOptions(options) { ... }
-function showTypingIndicator(show) { ... }
-function addNoCountReference() { ... }
-function addStickerMessage(stickerPath) { ... }
-function endChatStory() { ... }
-function personalizeRatingMessage() { ... }
-function getCurrentTime() { ... }
-function setupAutoScroll() { ... }
-
-// Initialize auto-scroll when page loads
-    document.addEventListener('DOMContentLoaded', function() {
-        setupAutoScroll();
                           
 });
