@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let noClickCount = 0;
     let isNoButtonMoving = false;
     let noButtonMoveInterval;
-    
+    let originalNoClickCount = 0;
     // Initialize the page
     initPage();
     
