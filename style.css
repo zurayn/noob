@@ -733,33 +733,23 @@ body {
 
 /* Secret Discovery Hint */
 .secret-discovery-hint {
-    margin-top: 40px;
-    padding: 0 20px;
+    margin-top: 30px;
+    padding: 0;
     width: 100%;
-    max-width: 500px;
-    transform: translateY(20px);
     opacity: 0;
+    transform: translateY(20px);
+    display: none; /* Hide by default */
 }
 
 .secret-discovery-hint.show {
+    display: block;
     animation: fadeInUp 0.8s ease forwards;
-}
-
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
 }
 
 .secret-hint-content {
     background: linear-gradient(135deg, rgba(255, 182, 217, 0.15) 0%, rgba(255, 182, 217, 0.05) 100%);
     border-radius: 20px;
-    padding: 25px;
+    padding: 20px;
     border: 1px solid rgba(255, 107, 107, 0.2);
     backdrop-filter: blur(10px);
     position: relative;
@@ -780,30 +770,30 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
     position: relative;
 }
 
 .phone-icon {
-    font-size: 3rem;
+    font-size: 2.5rem;
     animation: gentleShake 2s infinite;
     z-index: 1;
 }
 
 .shake-animation {
     position: absolute;
-    right: 20%;
+    right: 25%;
     top: 50%;
     transform: translateY(-50%);
 }
 
 .shake-dot {
     display: block;
-    width: 6px;
-    height: 6px;
+    width: 5px;
+    height: 5px;
     background-color: var(--red-medium);
     border-radius: 50%;
-    margin: 4px 0;
+    margin: 3px 0;
     animation: dotPulse 2s infinite;
 }
 
@@ -828,30 +818,24 @@ body {
 
 .secret-hint-title {
     font-family: 'Dancing Script', cursive;
-    font-size: 1.8rem;
+    font-size: 1.6rem;
     color: var(--red-medium);
-    margin-bottom: 10px;
+    margin-bottom: 8px;
 }
 
 .secret-hint-desc {
-    font-size: 1rem;
+    font-size: 0.95rem;
     color: #666;
-    margin-bottom: 8px;
-    line-height: 1.5;
+    margin-bottom: 5px;
+    line-height: 1.4;
 }
 
 .secret-hint-sub {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     color: #888;
     font-style: italic;
 }
 
-/* Desktop version hint */
-.desktop-hint {
-    display: none;
-}
-
-/* Fade in animation */
 @keyframes fadeInUp {
     from {
         opacity: 0;
@@ -863,22 +847,22 @@ body {
     }
 }
 
-/* Add responsive adjustments */
+/* Mobile adjustments */
 @media (max-width: 500px) {
-    .secret-discovery-hint {
-        padding: 0 15px;
-    }
-    
     .secret-hint-content {
-        padding: 20px;
+        padding: 15px;
     }
     
     .secret-hint-title {
-        font-size: 1.6rem;
+        font-size: 1.4rem;
     }
     
     .secret-hint-desc {
-        font-size: 0.95rem;
+        font-size: 0.9rem;
+    }
+    
+    .phone-icon {
+        font-size: 2rem;
     }
 }
 
