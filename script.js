@@ -20,6 +20,11 @@ document.addEventListener('DOMContentLoaded', function() {
     let noClickCount = 0;
     let isNoButtonMoving = false;
     let noButtonMoveInterval;
+
+    let chatHistory = [];
+let currentStep = 0;
+let userChoices = [];
+let originalNoClickCount = 0;
     
     // Initialize the page
     initPage();
@@ -72,69 +77,548 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Handle YES button click
-    function handleYesClick() {
-        // Create heart burst effect
-        createHeartBurst();
-        
-        // Create confetti
-        createConfetti();
+         // ============ INTERACTIVE CHAT STORY SYSTEM ============
+let chatHistory = [];
+let currentStep = 0;
+let userChoices = [];
+let noClickCountFromGame = 0;
 
-         // Show stickers every time YES is clicked
-        createStickers(); // REMOVED: if (!hasShownStickers) condition
+// Store noClickCount from main game
+let originalNoClickCount = 0;
+
+// Chat story steps - each step can have a message, options, and next steps
+const chatStory = {
+    steps: [
+        // Step 0 - Initial message
+        {
+            id: 0,
+            type: "zurayn",
+            message: "Is this fr? 👀",
+            delay: 800,
+            typingSpeed: 40
+        },
         
-        // Show celebration screen after a short delay
+        // Step 1 - Options
+        {
+            id: 1,
+            type: "options",
+            options: [
+                {
+                    text: "Yeah, why not? 😊",
+                    nextStep: 2,
+                    value: "positive"
+                },
+                {
+                    text: "Nope, you're dreaming 😂",
+                    nextStep: 3,
+                    value: "negative"
+                }
+            ]
+        },
+        
+        // Step 2 - Response to positive
+        {
+            id: 2,
+            type: "zurayn",
+            message: "WOW! Even White Coat Man approves! 😾<br>Wait... you're not just saying that right? 👉👈",
+            delay: 300,
+            typingSpeed: 45
+        },
+        
+        // Step 3 - Response to negative
+        {
+            id: 3,
+            type: "zurayn",
+            message: "Hatt! Think again 😾<br>You can't do this to me 😔 We're proud gay na? 🤣",
+            delay: 300,
+            typingSpeed: 50
+        },
+        
+        // Step 4 - Options after positive
+        {
+            id: 4,
+            type: "options",
+            options: [
+                {
+                    text: "I'm serious! 😤",
+                    nextStep: 5,
+                    value: "serious"
+                },
+                {
+                    text: "Maybe... maybe not 😏",
+                    nextStep: 6,
+                    value: "playful"
+                }
+            ]
+        },
+        
+        // Step 5 - Options after negative
+        {
+            id: 5,
+            type: "options",
+            options: [
+                {
+                    text: "Okay okay, I'm kidding! 😂",
+                    nextStep: 7,
+                    value: "kidding"
+                },
+                {
+                    text: "Sorry, it's a no 💔",
+                    nextStep: 8,
+                    value: "final_no"
+                }
+            ]
+        },
+        
+        // Step 6 - Serious response
+        {
+            id: 6,
+            type: "zurayn",
+            message: "bbg energy confirmed! ✌️😼<br>So... how hawt 🔥 am I compared to White Coat Man? Be honest 😼",
+            delay: 300,
+            typingSpeed: 45,
+            special: function() {
+                // Add sticker after message
+                setTimeout(() => {
+                    addStickerMessage("stickers/sticker1.png");
+                }, 1000);
+            }
+        },
+        
+        // Step 7 - Playful response
+        {
+            id: 7,
+            type: "zurayn",
+            message: "Ayo fr?? That's not a clear answer! 😾<br>Let me ask differently... do you at least like talking to me? 👀",
+            delay: 300,
+            typingSpeed: 50
+        },
+        
+        // Step 8 - Kidding response
+        {
+            id: 8,
+            type: "zurayn",
+            message: "Phew! Don't scare me like that! 😭<br>So you DO like me? 👉👈",
+            delay: 400,
+            typingSpeed: 40
+        },
+        
+        // Step 9 - Final no response
+        {
+            id: 9,
+            type: "zurayn",
+            message: "Cyaa... you're breaking my heart 💔<br>Alright, I'll accept defeat... but you have to admit this site was kinda kool? 😼",
+            delay: 500,
+            typingSpeed: 60
+        },
+        
+        // Step 10 - Options after serious
+        {
+            id: 10,
+            type: "options",
+            options: [
+                {
+                    text: "You're way hotter 🔥",
+                    nextStep: 11,
+                    value: "hotter"
+                },
+                {
+                    text: "White Coat Man wins 🥶",
+                    nextStep: 12,
+                    value: "white_coat_wins"
+                }
+            ]
+        },
+        
+        // Step 11 - Hotter response
+        {
+            id: 11,
+            type: "zurayn",
+            message: "YESS! 🥳 You just made my day!<br>Okay, now for real... wanna see something sweet? 👀",
+            delay: 300,
+            typingSpeed: 40,
+            special: function() {
+                // Trigger confetti
+                setTimeout(() => {
+                    createConfetti();
+                }, 800);
+            }
+        },
+        
+        // Step 12 - White coat wins
+        {
+            id: 12,
+            type: "zurayn",
+            message: "Cyaa... I knew it 🥀<br>White Coat Man always wins huh? 😔<br>JK! I'm still your #1 billu 😼",
+            delay: 400,
+            typingSpeed: 50
+        }
+    ]
+};
+
+// Handle YES button click - NEW VERSION
+function handleYesClick() {
+    // Store the current noClickCount from main game
+    originalNoClickCount = noClickCount;
+    
+    // Create heart burst effect
+    createHeartBurst();
+    
+    // Create confetti
+    createConfetti();
+
+    // Show stickers every time
+    createStickers();
+    
+    // Update response text before transition
+    const responses = [
+        "Yay! I knew it! 😼❤️",
+        "Ayo fr?? You're not lying right? 😂",
+        "Even White Coat Man approves! (maybe) 😾",
+        "bbg energy confirmed! ✌️",
+        "Hatt! For real? 😭❤️"
+    ];
+    responseText.textContent = responses[Math.floor(Math.random() * responses.length)];
+    
+    // Show chat screen after a short delay
+    setTimeout(() => {
+        questionScreen.classList.remove('active');
+        yesScreen.classList.add('active');
+        
+        // Start chat story
+        setTimeout(initChatStory, 500);
+        
+        // Auto scroll to show chat
         setTimeout(() => {
-            questionScreen.classList.remove('active');
-            yesScreen.classList.add('active');
-            
-            // Scroll to top of yes screen
-            yesScreen.scrollIntoView({ behavior: 'smooth' });
+            document.querySelector('.chat-story-container').scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'start' 
+            });
         }, 800);
+    }, 800);
+}
 
-        // Show secret hint after YES click
-setTimeout(() => {
-    const secretHint = document.getElementById('secret-hint-container');
-    if (secretHint) {
-        // Show the hint immediately
-        secretHint.classList.add('show');
-        
-        // Check if device is mobile or desktop
-        function isMobileDevice() {
-            return (('ontouchstart' in window) ||
-                   (navigator.maxTouchPoints > 0) ||
-                   (navigator.msMaxTouchPoints > 0));
+// Initialize chat story
+function initChatStory() {
+    // Reset chat state
+    chatHistory = [];
+    currentStep = 0;
+    userChoices = [];
+    
+    // Clear chat display
+    const chatDisplay = document.getElementById('chat-display');
+    const optionsContainer = document.getElementById('options-container');
+    chatDisplay.innerHTML = '';
+    optionsContainer.innerHTML = '';
+    
+    // Add context message
+    addSystemMessage("Ayo fr? You actually clicked YES? 😭❤️");
+    
+    // Start chat sequence
+    setTimeout(() => {
+        processStep(0);
+    }, 1000);
+    
+    // Add back button functionality
+    document.getElementById('back-to-question').addEventListener('click', function() {
+        if (confirm("Go back to question? Your chat progress will be lost!")) {
+            restartExperience();
         }
+    });
+}
+
+// Process a chat step
+function processStep(stepId) {
+    const step = chatStory.steps.find(s => s.id === stepId);
+    if (!step) {
+        // End of chat - show rating
+        endChatStory();
+        return;
+    }
+    
+    switch(step.type) {
+        case "zurayn":
+            showTypingIndicator(true);
+            
+            setTimeout(() => {
+                addMessage("zurayn", step.message, step.typingSpeed);
+                showTypingIndicator(false);
+                
+                // Execute special function if exists
+                if (step.special && typeof step.special === 'function') {
+                    step.special();
+                }
+                
+                // Check if there's a reference to noClickCount
+                if (originalNoClickCount > 0 && stepId === 2) {
+                    setTimeout(() => {
+                        addNoCountReference();
+                    }, 1000);
+                }
+                
+                // Find next step
+                const nextStep = chatStory.steps.find(s => s.id === stepId + 1);
+                if (nextStep) {
+                    setTimeout(() => {
+                        processStep(nextStep.id);
+                    }, step.delay || 500);
+                }
+            }, 1000);
+            break;
+            
+        case "options":
+            setTimeout(() => {
+                showOptions(step.options);
+            }, 800);
+            break;
+    }
+}
+
+// Add message to chat
+function addMessage(sender, text, typingSpeed = 40) {
+    const chatDisplay = document.getElementById('chat-display');
+    
+    // Create message bubble
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message-bubble ${sender === 'zurayn' ? 'sender' : 'receiver'}`;
+    
+    const contentDiv = document.createElement('div');
+    contentDiv.className = 'message-content';
+    
+    // Add message text with typing effect
+    contentDiv.innerHTML = `<p>${text}</p><span class="message-time">${getCurrentTime()}</span>`;
+    
+    messageDiv.appendChild(contentDiv);
+    chatDisplay.appendChild(messageDiv);
+    
+    // Animate message
+    messageDiv.style.animation = 'messageSlideIn 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28)';
+    
+    // Add to history
+    chatHistory.push({
+        sender: sender,
+        text: text,
+        time: new Date()
+    });
+    
+    // Auto scroll to bottom
+    setTimeout(() => {
+        chatDisplay.scrollTop = chatDisplay.scrollHeight;
         
-        const hintDesc = secretHint.querySelector('.secret-hint-desc');
-        const hintSub = secretHint.querySelector('.secret-hint-sub');
+        // Add read receipt after a delay
+        if (sender === 'zurayn') {
+            setTimeout(() => {
+                const receipt = document.createElement('span');
+                receipt.className = 'read-receipt';
+                receipt.textContent = '✓✓';
+                contentDiv.querySelector('p').appendChild(receipt);
+                
+                // Mark as seen with animation
+                setTimeout(() => {
+                    messageDiv.classList.add('message-seen');
+                }, 300);
+            }, 1000);
+        }
+    }, 100);
+}
+
+// Add system message
+function addSystemMessage(text) {
+    const chatDisplay = document.getElementById('chat-display');
+    
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'message-bubble system-message';
+    
+    const contentDiv = document.createElement('div');
+    contentDiv.className = 'message-content';
+    contentDiv.innerHTML = `<p class="context-text">${text}</p><span class="message-time">now</span>`;
+    
+    messageDiv.appendChild(contentDiv);
+    chatDisplay.appendChild(messageDiv);
+}
+
+// Show options to user
+function showOptions(options) {
+    const optionsContainer = document.getElementById('options-container');
+    optionsContainer.innerHTML = '';
+    
+    options.forEach(option => {
+        const button = document.createElement('button');
+        button.className = 'option-btn';
+        button.innerHTML = option.text;
         
-        if (isMobileDevice()) {
-            // Mobile device
-            if (hintDesc) {
-                hintDesc.textContent = "Try shaking your phone for a secret message from Zurayn...";
+        button.addEventListener('click', function() {
+            // Animate selection
+            button.classList.add('selected');
+            
+            // Record choice
+            userChoices.push({
+                step: currentStep,
+                choice: option.value,
+                text: option.text
+            });
+            
+            // Show user's choice as message
+            setTimeout(() => {
+                addMessage("user", option.text, 20);
+                
+                // Clear options
+                optionsContainer.innerHTML = '';
+                
+                // Process next step
+                setTimeout(() => {
+                    processStep(option.nextStep);
+                }, 800);
+            }, 300);
+        });
+        
+        optionsContainer.appendChild(button);
+    });
+    
+    // Add subtle animation to options
+    optionsContainer.style.opacity = '0';
+    setTimeout(() => {
+        optionsContainer.style.opacity = '1';
+        optionsContainer.style.transform = 'translateY(0)';
+    }, 10);
+}
+
+// Show typing indicator
+function showTypingIndicator(show) {
+    const indicator = document.getElementById('typing-indicator');
+    const status = document.querySelector('.online-status');
+    
+    if (show) {
+        indicator.classList.add('active');
+        status.textContent = 'online • typing...';
+    } else {
+        indicator.classList.remove('active');
+        status.textContent = 'online • just now';
+    }
+}
+
+// Add reference to noClickCount if user clicked NO multiple times
+function addNoCountReference() {
+    if (originalNoClickCount > 3) {
+        const chatDisplay = document.getElementById('chat-display');
+        
+        const referenceDiv = document.createElement('div');
+        referenceDiv.className = 'message-bubble system-message no-count-reference';
+        referenceDiv.innerHTML = `(After ${originalNoClickCount} NOs, finally got that YES! 😂)`;
+        
+        chatDisplay.appendChild(referenceDiv);
+        
+        // Auto scroll
+        setTimeout(() => {
+            chatDisplay.scrollTop = chatDisplay.scrollHeight;
+        }, 100);
+    }
+}
+
+// Add sticker message
+function addStickerMessage(stickerPath) {
+    const chatDisplay = document.getElementById('chat-display');
+    
+    const stickerDiv = document.createElement('div');
+    stickerDiv.className = 'message-bubble sender sticker-message';
+    
+    const img = document.createElement('img');
+    img.src = stickerPath;
+    img.alt = 'Sticker';
+    img.onerror = function() {
+        this.src = 'https://cdn.jsdelivr.net/npm/twemoji@14.0.2/svg/1f496.svg';
+    };
+    
+    stickerDiv.appendChild(img);
+    chatDisplay.appendChild(stickerDiv);
+    
+    // Auto scroll
+    setTimeout(() => {
+        chatDisplay.scrollTop = chatDisplay.scrollHeight;
+    }, 100);
+}
+
+// End chat story and show rating
+function endChatStory() {
+    // Hide chat interface
+    document.querySelector('.chat-story-container').style.opacity = '0';
+    document.querySelector('.chat-story-container').style.transform = 'scale(0.95)';
+    
+    // Show rating overlay after delay
+    setTimeout(() => {
+        document.querySelector('.chat-story-container').style.display = 'none';
+        document.getElementById('rating-overlay').style.display = 'flex';
+        
+        // Add personalized message based on chat choices
+        personalizeRatingMessage();
+        
+        // Show secret hint after a delay
+        setTimeout(() => {
+            const secretHint = document.getElementById('secret-hint-container');
+            if (secretHint) {
+                secretHint.classList.add('show');
             }
+        }, 2000);
+    }, 500);
+}
+
+// Personalize rating message based on chat choices
+function personalizeRatingMessage() {
+    const finalMessage = document.querySelector('.final-message h4');
+    const note = document.querySelector('.rating-note');
+    
+    // Check if user was playful or serious
+    const seriousChoice = userChoices.find(c => c.value === 'serious');
+    const hotChoice = userChoices.find(c => c.value === 'hotter');
+    
+    if (seriousChoice && hotChoice) {
+        finalMessage.textContent = "Btw, thanks for saying I'm hotter than White Coat Man ❤️ Now rate my coding!";
+    } else if (originalNoClickCount > 5) {
+        note.textContent = "(Pick all 5 stars to make up for all those NOs! 😾)";
+    }
+}
+
+// Get current time for messages
+function getCurrentTime() {
+    const now = new Date();
+    return now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
+// Auto-scroll to bottom function
+function setupAutoScroll() {
+    const chatDisplay = document.getElementById('chat-display');
+    const scrollIndicator = document.createElement('div');
+    scrollIndicator.className = 'scroll-indicator';
+    scrollIndicator.innerHTML = '↓';
+    scrollIndicator.title = 'Scroll to latest messages';
+    
+    chatDisplay.parentElement.appendChild(scrollIndicator);
+    
+    // Show indicator when not at bottom
+    chatDisplay.addEventListener('scroll', function() {
+        const isAtBottom = chatDisplay.scrollHeight - chatDisplay.scrollTop <= chatDisplay.clientHeight + 50;
+        
+        if (isAtBottom) {
+            scrollIndicator.classList.remove('show');
         } else {
-            // Desktop
-            if (hintDesc) {
-                hintDesc.innerHTML = "Press the <strong>'S' key</strong> for a secret message from Zurayn...";
-            }
-            if (hintSub) {
-                hintSub.textContent = "(Or just pretend to shake your laptop 😂)";
-            }
+            scrollIndicator.classList.add('show');
         }
-    }
-}, 1500); // Show hint 1.5 seconds after YES screen appears
-        
-        // Update response text before transition
-        const responses = [
-            "Yay! I knew it! 😼❤️",
-            "Ayo fr?? You're not lying right? 😂",
-            "Even White Coat Man approves! (maybe) 😾",
-            "bbg energy confirmed! ✌️",
-            "Hatt! For real? 😭❤️"
-        ];
-        responseText.textContent = responses[Math.floor(Math.random() * responses.length)];
-    }
+    });
+    
+    // Scroll to bottom on click
+    scrollIndicator.addEventListener('click', function() {
+        chatDisplay.scrollTo({
+            top: chatDisplay.scrollHeight,
+            behavior: 'smooth'
+        });
+    });
+}
+
+// Initialize auto-scroll when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    setupAutoScroll();
+});
+
     
     // Handle NO button click
     function handleNoClick() {
@@ -301,6 +785,22 @@ setTimeout(() => {
     if (secretHint) {
         secretHint.classList.remove('show');
     }
+        // === ADD THESE LINES FOR CHAT CLEANUP ===
+    // Show chat container again if it was hidden
+    const chatContainer = document.querySelector('.chat-story-container');
+    const ratingOverlay = document.getElementById('rating-overlay');
+    if (chatContainer) {
+        chatContainer.style.display = 'flex';
+        chatContainer.style.opacity = '1';
+        chatContainer.style.transform = 'scale(1)';
+    }
+    if (ratingOverlay) {
+        ratingOverlay.style.display = 'none';
+    }
+    // ========================================
+    
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });    
         // Clear any remaining stickers
         const stickersContainer = document.querySelector('.stickers-container');
         if (stickersContainer) {
@@ -791,4 +1291,39 @@ if (secretHintContainer) {
         desktopHint.style.display = 'block';
     }
 }
+    // ============ INTERACTIVE CHAT STORY SYSTEM ============
+
+// Add the entire chatStory object here
+const chatStory = {
+    steps: [
+        // Step 0 - Initial message
+        {
+            id: 0,
+            type: "zurayn",
+            message: "Is this fr? 👀",
+            delay: 800,
+            typingSpeed: 40
+        },
+        // ... ALL THE STEPS FROM MY CODE
+    ]
+};
+
+// Then add ALL these functions:
+function initChatStory() { ... }
+function processStep(stepId) { ... }
+function addMessage(sender, text, typingSpeed = 40) { ... }
+function addSystemMessage(text) { ... }
+function showOptions(options) { ... }
+function showTypingIndicator(show) { ... }
+function addNoCountReference() { ... }
+function addStickerMessage(stickerPath) { ... }
+function endChatStory() { ... }
+function personalizeRatingMessage() { ... }
+function getCurrentTime() { ... }
+function setupAutoScroll() { ... }
+
+// Initialize auto-scroll when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        setupAutoScroll();
+                          
 });
