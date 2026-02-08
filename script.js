@@ -425,122 +425,323 @@ setTimeout(() => {
         });
     }
 
-    // ============ SECRET MODE FIXED ============
-    const secretScreen = document.getElementById('secret-screen');
-    const okayBtn = document.getElementById('okay-btn');
-    const typedText = document.getElementById('typed-text');
+    // Replace the existing secret mode section (lines 391-573) with this:
+
+// ============ ENHANCED SECRET MODE ============
+const secretScreen = document.getElementById('secret-screen');
+const okayBtn = document.getElementById('okay-btn');
+const typedText = document.getElementById('typed-text');
+
+if (secretScreen && okayBtn && typedText) {
+    let isSecretModeActive = false;
+    let typingTimeout = null;
+    let lastShakeTime = 0;
     
-    if (secretScreen && okayBtn && typedText) {
-        let isSecretModeActive = false;
-        let typingTimeout = null;
-        let lastShakeTime = 0;
-        
-        const secretMessage = `I joke a lot, but genuinely talking to you feels easy, hazyyy.
+    const secretMessage = `I joke a lot, but genuinely talking to you feels easy, hazyyy.
 Our chats are never planned, never serious on purpose, but somehow they fit into my day naturally.
-You’re the first notification I see and the last one before the day ends and yeah, that quietly makes a difference.
+You're the first notification I see and the last one before the day ends, and yeah, that quietly makes a difference.
 
-This site, the jokes, the chaos it’s just a small, coded way of saying you matter to me as a friend, more than you probably realize ❤️
+This site, the jokes, the chaos... it's just a small, coded way of saying you matter to me as a friend, more than you probably realize. ❤️
 
-Okay, stopping here before this gets awkward 😂✌️`;
+Okay, stopping here before this gets awkward. 😂✌️`;
+
+    // Create romantic background effects
+    function createSecretBackground() {
+        const heartsContainer = document.querySelector('.secret-hearts-container');
+        const particlesContainer = document.querySelector('.secret-particles-container');
         
-        // Type message with typing animation
-        function typeMessage() {
-            // Clear any existing typing
-            if (typingTimeout) {
-                clearTimeout(typingTimeout);
-                typingTimeout = null;
-            }
+        if (!heartsContainer || !particlesContainer) return;
+        
+        // Clear existing
+        heartsContainer.innerHTML = '';
+        particlesContainer.innerHTML = '';
+        
+        // Create floating hearts
+        const heartEmojis = ['❤️', '💖', '💗', '💓', '💞', '💕', '💌', '🌹', '🌸', '💐'];
+        
+        for (let i = 0; i < 15; i++) {
+            const heart = document.createElement('div');
+            heart.classList.add('secret-heart');
+            heart.textContent = heartEmojis[Math.floor(Math.random() * heartEmojis.length)];
             
-            typedText.innerHTML = '';
-            let charIndex = 0;
+            // Random position and size
+            heart.style.left = `${Math.random() * 100}%`;
+            heart.style.fontSize = `${15 + Math.random() * 20}px`;
+            heart.style.animationDelay = `${Math.random() * 5}s`;
+            heart.style.animationDuration = `${10 + Math.random() * 15}s`;
             
-            function typeNextChar() {
-                if (charIndex < secretMessage.length) {
-                    // Handle newlines
-                    if (secretMessage[charIndex] === '\n') {
-                        typedText.innerHTML += '<br>';
-                    } else {
-                        typedText.innerHTML += secretMessage[charIndex];
-                    }
-                    
-                    charIndex++;
-                    
-                    // Scroll to keep text visible
-                    typedText.scrollTop = typedText.scrollHeight;
-                    
-                    // Random typing speed for natural feel
-                    const speed = 30 + Math.random() * 20;
-                    typingTimeout = setTimeout(typeNextChar, speed);
-                }
-            }
-            
-            typeNextChar();
+            heartsContainer.appendChild(heart);
         }
         
-        // OK button event
-        okayBtn.addEventListener('click', function() {
-            if (typingTimeout) {
-                clearTimeout(typingTimeout);
-            }
+        // Create floating particles
+        for (let i = 0; i < 50; i++) {
+            const particle = document.createElement('div');
+            particle.classList.add('secret-particle');
             
+            // Random properties
+            const size = 1 + Math.random() * 4;
+            particle.style.width = `${size}px`;
+            particle.style.height = `${size}px`;
+            particle.style.left = `${Math.random() * 100}%`;
+            particle.style.opacity = `${0.2 + Math.random() * 0.5}`;
+            particle.style.animationDelay = `${Math.random() * 3}s`;
+            particle.style.animationDuration = `${10 + Math.random() * 20}s`;
+            particle.style.setProperty('--random-x', `${Math.random() * 100 - 50}px`);
+            
+            particlesContainer.appendChild(particle);
+        }
+    }
+    
+    // Type message with enhanced animation
+    function typeMessage() {
+        if (typingTimeout) {
+            clearTimeout(typingTimeout);
+        }
+        
+        typedText.innerHTML = '';
+        let charIndex = 0;
+        let lineIndex = 0;
+        
+        // Show typing indicator
+        const typingIndicator = document.querySelector('.typing-indicator');
+        if (typingIndicator) {
+            typingIndicator.style.display = 'flex';
+        }
+        
+        function typeNextChar() {
+            if (charIndex < secretMessage.length) {
+                const currentChar = secretMessage[charIndex];
+                
+                // Handle special formatting
+                if (currentChar === '\n') {
+                    typedText.innerHTML += '<br>';
+                    lineIndex++;
+                    
+                    // Add slight delay after line breaks
+                    charIndex++;
+                    typingTimeout = setTimeout(typeNextChar, 100);
+                    return;
+                }
+                
+                // Add character with possible styling
+                let charHtml = currentChar;
+                
+                // Style emojis differently
+                const emojiRegex = /[\u{1F300}-\u{1F9FF}]/u;
+                if (emojiRegex.test(currentChar)) {
+                    charHtml = `<span class="secret-emoji">${currentChar}</span>`;
+                }
+                
+                // Style hearts specially
+                if (currentChar === '❤️') {
+                    charHtml = `<span class="secret-heart-char" style="color:#ff6b8b">${currentChar}</span>`;
+                }
+                
+                typedText.innerHTML += charHtml;
+                charIndex++;
+                
+                // Scroll to keep text visible
+                typedText.scrollTop = typedText.scrollHeight;
+                
+                // Dynamic typing speed for natural feel
+                let speed = 30;
+                
+                // Slower for punctuation and line breaks
+                if (/[.,;!?\n]/.test(currentChar)) {
+                    speed = 70;
+                }
+                // Faster for spaces
+                else if (currentChar === ' ') {
+                    speed = 20;
+                }
+                // Medium for regular characters
+                else {
+                    speed = 40 + Math.random() * 20;
+                }
+                
+                typingTimeout = setTimeout(typeNextChar, speed);
+            } else {
+                // Typing complete - hide typing indicator
+                if (typingIndicator) {
+                    setTimeout(() => {
+                        typingIndicator.style.opacity = '0';
+                        setTimeout(() => {
+                            typingIndicator.style.display = 'none';
+                        }, 300);
+                    }, 500);
+                }
+                
+                // Add completion effect
+                typedText.innerHTML += `<span class="typing-complete"> 💫</span>`;
+            }
+        }
+        
+        typeNextChar();
+    }
+    
+    // OK button event
+    okayBtn.addEventListener('click', function() {
+        if (typingTimeout) {
+            clearTimeout(typingTimeout);
+        }
+        
+        // Add button click effect
+        this.style.transform = 'scale(0.95)';
+        setTimeout(() => {
+            this.style.transform = '';
+        }, 200);
+        
+        // Fade out secret screen
+        secretScreen.style.opacity = '0';
+        secretScreen.style.transform = 'scale(1.05)';
+        
+        setTimeout(() => {
             secretScreen.classList.remove('active');
             document.getElementById('intro-screen').classList.add('active');
             isSecretModeActive = false;
-        });
+            
+            // Reset styles
+            secretScreen.style.opacity = '';
+            secretScreen.style.transform = '';
+        }, 300);
+    });
+    
+    // Enhanced shake detection
+    function handleShake(event) {
+        if (isSecretModeActive) return;
         
-        // Shake detection
-        function handleShake(event) {
-            if (isSecretModeActive) return;
+        const acceleration = event.accelerationIncludingGravity;
+        if (!acceleration) return;
+        
+        // Calculate movement intensity
+        const movement = Math.abs(acceleration.x || 0) + 
+                       Math.abs(acceleration.y || 0) + 
+                       Math.abs(acceleration.z || 0);
+        
+        const now = Date.now();
+        
+        // More sensitive shake detection
+        if (movement > 20 && (now - lastShakeTime) > 2500) {
+            lastShakeTime = now;
             
-            const acceleration = event.accelerationIncludingGravity;
-            if (!acceleration) return;
+            // Add shake confirmation effect
+            document.body.style.transform = 'translateX(5px)';
+            setTimeout(() => {
+                document.body.style.transform = 'translateX(-5px)';
+                setTimeout(() => {
+                    document.body.style.transform = '';
+                }, 50);
+            }, 50);
             
-            // Calculate movement
-            const movement = Math.abs(acceleration.x || 0) + 
-                           Math.abs(acceleration.y || 0) + 
-                           Math.abs(acceleration.z || 0);
-            
-            const now = Date.now();
-            
-            // Check for shake
-            if (movement > 25 && (now - lastShakeTime) > 3000) {
-                lastShakeTime = now;
-                activateSecretMode();
-            }
+            setTimeout(activateSecretMode, 200);
         }
+    }
+    
+    // Enhanced activate secret mode
+    function activateSecretMode() {
+        if (isSecretModeActive) return;
         
-        // Activate secret mode
-        function activateSecretMode() {
-            if (isSecretModeActive) return;
-            
-            isSecretModeActive = true;
-            
-            // Hide current screen
-            const activeScreen = document.querySelector('.screen.active');
-            if (activeScreen) {
+        isSecretModeActive = true;
+        
+        // Create romantic background
+        createSecretBackground();
+        
+        // Hide current screen with transition
+        const activeScreen = document.querySelector('.screen.active');
+        if (activeScreen) {
+            activeScreen.style.opacity = '0';
+            activeScreen.style.transform = 'scale(0.95)';
+            setTimeout(() => {
                 activeScreen.classList.remove('active');
-            }
-            
-            // Show secret screen
-            secretScreen.classList.add('active');
-            
-            // Start typing animation
-            setTimeout(typeMessage, 500);
+                activeScreen.style.opacity = '';
+                activeScreen.style.transform = '';
+            }, 300);
         }
         
-        // Add shake listener
-        if (window.DeviceMotionEvent) {
+        // Show secret screen with effects
+        secretScreen.style.opacity = '0';
+        secretScreen.style.transform = 'scale(0.9)';
+        secretScreen.classList.add('active');
+        
+        // Animate in
+        setTimeout(() => {
+            secretScreen.style.transition = 'all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
+            secretScreen.style.opacity = '1';
+            secretScreen.style.transform = 'scale(1)';
+        }, 10);
+        
+        // Start typing animation with delay
+        setTimeout(typeMessage, 800);
+    }
+    
+    // Add shake listener
+    if (window.DeviceMotionEvent) {
+        let isRequested = false;
+        
+        // Request permission for iOS 13+
+        if (typeof DeviceMotionEvent.requestPermission === 'function') {
+            document.addEventListener('click', function requestPermissionOnce() {
+                DeviceMotionEvent.requestPermission()
+                    .then(permissionState => {
+                        if (permissionState === 'granted') {
+                            window.addEventListener('devicemotion', handleShake);
+                        }
+                    })
+                    .catch(console.error);
+                
+                document.removeEventListener('click', requestPermissionOnce);
+            });
+        } else {
             window.addEventListener('devicemotion', handleShake);
         }
-        
-        // Desktop testing - press 'S' key
-        document.addEventListener('keydown', function(e) {
-            if ((e.key === 's' || e.key === 'S') && !isSecretModeActive) {
-                e.preventDefault();
-                activateSecretMode();
-            }
-        });
     }
+    
+    // Desktop testing - press 'S' key
+    document.addEventListener('keydown', function(e) {
+        if ((e.key === 's' || e.key === 'S') && !isSecretModeActive) {
+            e.preventDefault();
+            
+            // Add keypress feedback
+            const keyHint = document.querySelector('.desktop-hint');
+            if (keyHint) {
+                keyHint.style.color = '#ff6b8b';
+                keyHint.style.transform = 'scale(1.1)';
+                setTimeout(() => {
+                    keyHint.style.color = '';
+                    keyHint.style.transform = '';
+                }, 300);
+            }
+            
+            activateSecretMode();
+        }
+    });
+    
+    // Add CSS for emoji styling
+    const style = document.createElement('style');
+    style.textContent = `
+        .secret-emoji {
+            display: inline-block;
+            animation: gentleFloat 2s ease-in-out infinite;
+            margin: 0 2px;
+        }
+        
+        .secret-heart-char {
+            display: inline-block;
+            animation: gentleHeartbeat 1.5s infinite;
+            margin: 0 2px;
+        }
+        
+        .typing-complete {
+            opacity: 0;
+            animation: fadeIn 0.5s ease 0.3s forwards;
+        }
+        
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+    `;
+    document.head.appendChild(style);
+}
     // Secret hint functionality
 const secretHintContainer = document.getElementById('secret-hint-container');
 
