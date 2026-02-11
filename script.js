@@ -1253,20 +1253,11 @@ Okay, stopping here before this gets awkward. 😂✌️`;
                     typedText.innerHTML += charHtml;
                     charIndex++;
                     
-                    // Auto-scroll the text container
+                    // Auto-scroll only the message box (not the container!)
                     typedText.scrollTo({
                         top: typedText.scrollHeight,
                         behavior: 'smooth'
                     });
-                    
-                    // Also scroll the secret container (not the whole screen!)
-                    const secretContainer = document.querySelector('.secret-container');
-                    if (secretContainer) {
-                        secretContainer.scrollTo({
-                            top: secretContainer.scrollHeight,
-                            behavior: 'smooth'
-                        });
-                    }
                     
                     // Dynamic typing speed for natural feel
                     let speed = 30;
@@ -1299,16 +1290,21 @@ Okay, stopping here before this gets awkward. 😂✌️`;
                     // Add completion effect
                     typedText.innerHTML += `<span class="typing-complete"> 💫</span>`;
                     
-                    // Final scroll to show completion
+                    // Final scroll to show completion (only scroll the text box)
                     setTimeout(() => {
-                        const secretContainer = document.querySelector('.secret-container');
-                        if (secretContainer) {
-                            secretContainer.scrollTo({
-                                top: secretContainer.scrollHeight,
-                                behavior: 'smooth'
-                            });
-                        }
+                        typedText.scrollTo({
+                            top: typedText.scrollHeight,
+                            behavior: 'smooth'
+                        });
                     }, 200);
+                    
+                    // Show button after 3 seconds
+                    setTimeout(() => {
+                        const okayBtn = document.getElementById('okay-btn');
+                        if (okayBtn) {
+                            okayBtn.classList.add('show');
+                        }
+                    }, 3000);
                 }
             }
             
