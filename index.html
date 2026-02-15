@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hey Noor 🌹 - From Zurayn</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -15,6 +16,28 @@
     <div class="hearts-container"></div>
     <div class="confetti-container"></div>
     <div class="stickers-container"></div>
+
+    <!-- Time-Based Notification Popup -->
+    <div id="time-notification" class="time-notification hidden">
+        <div class="notification-content">
+            <div class="notification-header">
+                <img src="stickers/pfp.png" alt="Zurayn" class="notification-pfp" onerror="this.onerror=null; this.src='https://i.pravatar.cc/150?img=8';">
+                <div class="notification-info">
+                    <span class="notification-name">Zurayn</span>
+                    <span class="notification-time">just now</span>
+                </div>
+                <button class="notification-close" id="notification-close-btn">×</button>
+            </div>
+            <div class="notification-body" id="notification-message">
+                <!-- Message will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Sound (hidden audio element) -->
+    <audio id="notification-sound" preload="auto">
+    <source src="stickers/notification.mp3" type="audio/mpeg">
+</audio>
 
     <!-- Updated Secret Mode Screen -->
 <section id="secret-screen" class="screen">
@@ -222,14 +245,15 @@
         
         <!-- Footer with inside jokes -->
         <footer class="footer">
-            <p>Made with ❤️ by Zurayn (ur bbg/billu)</p>
-            <p class="footer-jokes">
-                <span>#Heckerr</span> •  
-                <span>#ProudGay</span> •
-                <span>#WhiteCoatManKiABCD</span> •
-                <span>#Blehh</span>
-            </p>
-        </footer>
+        <p>Made with ❤️ by Zurayn (ur bbg/billu)</p>
+        <p class="footer-jokes">
+        <span>#Heckerr</span> •  
+        <span>#ProudGay</span> •
+        <span>#WhiteCoatManKiABCD</span> •
+        <span>#Blehh</span>
+        </p>
+        <p class="site-version" id="site-version">v1.0</p>
+    </footer>
     </main>
 
     <script src="script.js"></script>

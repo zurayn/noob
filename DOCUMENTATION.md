@@ -11,6 +11,7 @@
 8. [Technical Limitations](#technical-limitations)
 9. [Making "Impossible" Things Possible](#making-impossible-things-possible)
 10. [Update Guidelines](#update-guidelines)
+11. [Version History](#version-history)
 
 ---
 
@@ -19,9 +20,11 @@
 ### What Is This?
 A personalized, interactive Valentine's website made by Zurayn for Noor. It's a playful, sweet experience that combines:
 - Branching conversation paths (21 messages)
+- Time-based notifications (sleep reminders & morning greetings)
 - Smooth animations and transitions
 - Hidden secret message (shake to reveal)
 - Personal inside jokes and genuine feelings
+- Version tracking system
 
 ### Tech Stack
 - **Pure HTML5** - Structure
@@ -44,9 +47,13 @@ A personalized, interactive Valentine's website made by Zurayn for Noor. It's a 
 
 ```
 valentine-website/
-├── index.html          (245 lines) - Structure
-├── style.css           (2111 lines) - All styling
-├── script.js           (1514 lines) - All functionality
+├── index.html          (~260 lines) - Structure
+├── style.css           (~2300 lines) - All styling
+├── script.js           (~1700 lines) - All functionality
+├── stickers/
+│   ├── pfp.png         - Zurayn's profile picture
+│   ├── notification.mp3 - Notification sound
+│   └── sticker*.png    - Sticker images
 └── DOCUMENTATION.md    (This file)
 ```
 
@@ -58,6 +65,7 @@ valentine-website/
 - Chat screen (21-message story)
 - Rating overlay
 - Secret message screen
+- Time-based notification popup
 - Background effects containers
 
 **Key IDs:**
@@ -68,6 +76,8 @@ valentine-website/
 - `#secret-screen` - Hidden message
 - `#chat-display` - Messages area
 - `#options-container` - Choice buttons
+- `#time-notification` - Time-based notification popup
+- `#site-version` - Version display
 
 ### style.css
 **Purpose:** All visual styling and animations
@@ -75,6 +85,7 @@ valentine-website/
 - CSS Variables (colors, shadows)
 - Screen layouts
 - Component styles (buttons, messages, etc.)
+- Notification styles (new)
 - Animations (fade, slide, float, etc.)
 - Mobile responsive (@media queries)
 
@@ -84,18 +95,26 @@ valentine-website/
 - `.secret-message-box` - Message container
 - `.rating-overlay` - Star rating
 - `.btn` - All buttons
+- `.time-notification` - Notification popup (new)
+- `.notification-expanded` - Expanded notification view (new)
+- `.site-version` - Version number display (new)
 
 **Animation System:**
 - `screenFadeIn` - Screen appears (0.6s)
 - `screenFadeOut` - Screen disappears (0.4s)
 - `messageSlideIn` - Chat bubble enters
+- `slideInDown` - Notification appears from top (new)
+- `slideOutUp` - Notification disappears to top (new)
 - `auroraFlow` - Secret screen background
 - `titleFloat` - Home title bounce
-- And 20+ other animations
+- `blink` - Cursor blinking in typing animation (new)
+- And 25+ other animations
 
 ### script.js
 **Purpose:** All interactivity and logic
 **Main Components:**
+- Version tracking (SITE_VERSION constant)
+- Time-based notification system (new)
 - Chat story system (branching paths)
 - Screen transitions
 - Secret message typing animation
@@ -109,8 +128,11 @@ valentine-website/
 - `addMessage()` - Show message bubble
 - `handleYesClick()` - Yes button logic
 - `handleNoClick()` - No button logic
+- `checkTimeAndNotify()` - Check time and show notification (new)
+- `showTimeNotification()` - Display notification with sound (new)
+- `typeExpandedMessage()` - Typing animation for expanded notification (new)
 - `detectShake()` - Accelerometer for secret
-- `typeMessage()` - Typing animation
+- `typeMessage()` - Typing animation for secret message
 
 ---
 
@@ -141,11 +163,195 @@ startBtn.addEventListener('click', showQuestionScreen);
 
 ---
 
-### 2. QUESTION SCREEN
+### 2. TIME-BASED NOTIFICATION SYSTEM ⭐ NEW
+
+**What it does:**
+- Shows personalized notifications based on time of day
+- Sleep reminders (11:30 PM - 4 AM)
+- Morning greetings (7 AM - 9 AM)
+- Plays custom notification sound
+- Expandable with typing animation
+- Different message each day
+
+**When it appears:**
+- On the **Question screen** (after user clicks "Aight let's see")
+- This ensures sound can play (user already interacted)
+
+**How it works:**
+
+**Time Detection:**
+```javascript
+function checkTimeAndNotify() {
+    const now = new Date();
+    const hours = now.getHours();
+    const minutes = now.getMinutes();
+    
+    // Convert to minutes since midnight
+    const currentMinutes = hours * 60 + minutes;
+    
+    // Late night: 11:30 PM (23:30) to 4:00 AM (4:00)
+    const isLateNight = (currentMinutes >= 1410) || (currentMinutes < 240);
+    
+    // Early morning: 7:00 AM to 9:00 AM
+    const isEarlyMorning = (currentMinutes >= 420 && currentMinutes < 540);
+    
+    if (isLateNight) {
+        const message = getRotatingMessage(sleepMessages);
+        showTimeNotification(message);
+    } else if (isEarlyMorning) {
+        const message = getRotatingMessage(morningMessages);
+        showTimeNotification(message);
+    }
+}
+```
+
+**Message Rotation System:**
+```javascript
+function getRotatingMessage(messagesArray) {
+    const today = new Date().getDate(); // 1-31
+    const index = (today - 1) % messagesArray.length;
+    return messagesArray[index];
+}
+```
+
+**This means:**
+- Same message all day (based on date)
+- Different message tomorrow
+- Cycles through all 30 sleep messages over the month
+- 10 morning messages cycle similarly
+
+**Sleep Messages (30 total):**
+- "yo it's late... maybe get some sleep?"
+- "bro it's literally past midnight, go sleep lol"
+- "noor... sleep. fr fr"
+- "why are you still up hazyyy"
+- "blehh go to bed already"
+- "cyaa it's so late, sleep pleasee"
+- (... 24 more)
+
+**Morning Messages (10 total):**
+- "yoo morning! you're up early"
+- "ayee look at you waking up early"
+- "morning noor! early bird energy fr"
+- "damnn you actually woke up early, proud of you"
+- (... 6 more)
+
+**Visual Design:**
+- Slides down from top (like phone notifications)
+- Pink gradient background with blur effect
+- Profile picture + "Zurayn" + "just now"
+- Pulsing badge indicator
+- Auto-dismisses after 10 seconds
+
+**Sound System:**
+```javascript
+// Plays custom mp3 file from stickers folder
+if (sound) {
+    sound.volume = 0.3; // 30% volume
+    sound.play().catch(err => {
+        console.log('Sound play prevented:', err);
+    });
+}
+```
+
+**Expandable Feature:**
+When notification is tapped:
+1. Expands with smooth animation
+2. Shows typing animation (character by character)
+3. Random sweet message appears:
+   - Night: "good night noor ❤️✨" / "good night bbg 💖🎀" / "good night darling ❤️✌️"
+   - Morning: "have a great day noor ❤️☀️" / "morning bbg ❤️🌹" / "you got this today ❤️✨"
+4. Cursor blinks at end for 2 seconds
+5. Auto-dismisses after 15 seconds (extended time)
+
+**Typing Animation:**
+```javascript
+function typeExpandedMessage(message) {
+    let index = 0;
+    msgElement.textContent = '';
+    
+    function typeChar() {
+        if (index < message.length) {
+            msgElement.textContent += message[index];
+            index++;
+            
+            // Variable speed for natural feel
+            const speed = message[index] === ' ' ? 30 : (50 + Math.random() * 30);
+            setTimeout(typeChar, speed);
+        } else {
+            // Add blinking cursor at end
+            msgElement.innerHTML += '<span class="cursor-blink">|</span>';
+        }
+    }
+    
+    typeChar();
+}
+```
+
+**How to customize:**
+
+**Change time ranges:**
+```javascript
+// Night time (currently 11:30 PM - 4 AM)
+const isLateNight = (currentMinutes >= 1410) || (currentMinutes < 240);
+// Change 1410 to adjust start time
+// Change 240 to adjust end time
+
+// Morning time (currently 7 AM - 9 AM)
+const isEarlyMorning = (currentMinutes >= 420 && currentMinutes < 540);
+// Change 420 to adjust start time
+// Change 540 to adjust end time
+```
+
+**Time conversion helper:**
+- 6 AM = 360 minutes
+- 7 AM = 420 minutes
+- 8 AM = 480 minutes
+- 9 AM = 540 minutes
+- 10 AM = 600 minutes
+- 10 PM = 1320 minutes
+- 11 PM = 1380 minutes
+- 11:30 PM = 1410 minutes
+- Midnight = 0 minutes
+- 1 AM = 60 minutes
+- 2 AM = 120 minutes
+- 3 AM = 180 minutes
+- 4 AM = 240 minutes
+
+**Add more expanded messages:**
+Find in script.js (around line 145-150):
+```javascript
+const messages = isNight ? 
+    [
+        "good night noor ❤️✨", 
+        "good night bbg 💖🎀", 
+        "good night darling ❤️✌️",
+        // Add more here
+    ] :
+    [
+        "have a great day noor ❤️☀️", 
+        "morning bbg ❤️🌹", 
+        "you got this today ❤️✨",
+        // Add more here
+    ];
+```
+
+**Change notification sound:**
+In index.html, update:
+```html
+<audio id="notification-sound" preload="auto">
+    <source src="stickers/your-sound.mp3" type="audio/mpeg">
+</audio>
+```
+
+---
+
+### 3. QUESTION SCREEN
 **What it does:**
 - Asks "do you like me?"
 - YES button → starts chat
 - NO button → moves around & shows sad messages
+- Time-based notification appears here
 
 **How it works:**
 
@@ -200,7 +406,7 @@ function startNoButtonMovement() {
 
 ---
 
-### 3. CHAT STORY (The Core Experience)
+### 4. CHAT STORY (The Core Experience)
 
 **Structure:**
 - 21 pre-written message steps
@@ -264,7 +470,7 @@ If "nah" → Step 3 → Step 5 → Step 8...
 
 ---
 
-### 4. AUTO-SCROLL SYSTEM
+### 5. AUTO-SCROLL SYSTEM
 
 **Problem:** Messages appear at bottom, user can't see them
 **Solution:** Smooth scroll after each message
@@ -293,11 +499,11 @@ function addMessage(message, type) {
 
 ---
 
-### 5. RATING OVERLAY
+### 6. RATING OVERLAY
 
 **What it does:**
 - Appears after chat ends
-- 5 gold stars (visual only, not clickable)
+- 5 gold stars (visual only, clickable for fun messages)
 - Secret hint box with shake instructions
 - Restart button
 
@@ -327,20 +533,20 @@ function showRatingOverlay() {
 5. Secret hint appears (slide up)
 
 **Stars:**
-- CSS-only (no click interaction)
-- Hover effect: scale + rotate + glow
+- CSS-only hover effects
+- Click shows funny messages based on rating
 - Gold color (#FFD700) with shadow
 
 ---
 
-### 6. SECRET MESSAGE (The Crown Jewel)
+### 7. SECRET MESSAGE (The Crown Jewel)
 
-**Activation:** Shake phone (accelerometer detection)
+**Activation:** Shake phone (accelerometer detection) or press 'S' key on desktop
 
 **How shake detection works:**
 ```javascript
 let lastX, lastY, lastZ;
-let shakeThreshold = 15;
+let shakeThreshold = 35; // Increased for harder shake
 
 window.addEventListener('devicemotion', (e) => {
     const x = e.accelerationIncludingGravity.x;
@@ -450,7 +656,7 @@ function typeMessage() {
 
 ---
 
-### 7. SMOOTH TRANSITIONS
+### 8. SMOOTH TRANSITIONS
 
 **Problem:** Screens just appearing/disappearing felt jarring
 **Solution:** Fade animations between all screens
@@ -514,16 +720,94 @@ function smoothTransition(fromScreen, toScreen, callback) {
 
 ---
 
-## 🏗️ CODE ARCHITECTURE
+### 9. VERSION TRACKING SYSTEM ⭐ NEW
+
+**What it does:**
+- Displays current site version in footer
+- Version number is tied to JavaScript file
+- Helps track if user has cached old version
+- Updates automatically when JS loads
+
+**How it works:**
+
+**Version constant (script.js line 1-2):**
+```javascript
+// Site Version
+const SITE_VERSION = "1.0";
+```
+
+**Version display (script.js around line 24):**
+```javascript
+// Update version display
+setTimeout(() => {
+    const versionEl = document.getElementById('site-version');
+    if (versionEl && typeof SITE_VERSION !== 'undefined') {
+        versionEl.textContent = `v${SITE_VERSION}`;
+    }
+}, 100);
+```
+
+**HTML footer (index.html):**
+```html
+<footer class="footer">
+    <p>Made with ❤️ by Zurayn (ur bbg/billu)</p>
+    <p class="footer-jokes">
+        <span>#Heckerr</span> •  
+        <span>#ProudGay</span> •
+        <span>#WhiteCoatManKiABCD</span> •
+        <span>#Blehh</span>
+    </p>
+    <p class="site-version" id="site-version">v1.0</p>
+</footer>
+```
+
+**Styling (style.css):**
+```css
+.site-version {
+    margin-top: 20px;
+    font-size: 0.75rem;
+    color: rgba(255, 182, 193, 0.6);
+    font-family: 'Courier New', monospace;
+    font-weight: 600;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+}
+
+.site-version:hover {
+    color: #FF69B4;
+    transform: scale(1.1);
+    cursor: default;
+}
+```
+
+**How to use:**
+1. Make updates to the site
+2. Change `SITE_VERSION` in script.js (e.g., "1.0" → "1.1")
+3. Upload files
+4. Ask Noor: "What version number do you see at the bottom?"
+5. If she sees old version = cache issue, tell her to hard refresh (Ctrl+Shift+R)
+
+**Benefits:**
+- ✅ Know if she's seeing latest version
+- ✅ Debug cache issues easily
+- ✅ Track when updates were deployed
+- ✅ Professional look
+
+---
+
+## 🗂️ CODE ARCHITECTURE
 
 ### JavaScript Structure
 
-**1. State Management (Simple variables)**
+**1. Version & State Management**
 ```javascript
+// Site Version (line 1-2)
+const SITE_VERSION = "1.0";
+
+// State variables (line 20-23)
 let noClickCount = 0;
 let isNoButtonMoving = false;
-let isSecretModeActive = false;
-let currentStep = 0;
+let noButtonMoveInterval;
 ```
 
 **2. DOM References (Cached at start)**
@@ -544,10 +828,12 @@ restartBtn.addEventListener('click', restartExperience);
 ```
 
 **4. Main Functions (By feature)**
-- Screen management: `showQuestionScreen()`, `smoothTransition()`
-- Chat system: `initChatStory()`, `addMessage()`, `showOptions()`
-- Effects: `createConfetti()`, `createHeartBurst()`
-- Secret: `detectShake()`, `typeMessage()`
+- **Version:** Update version display
+- **Notifications:** `checkTimeAndNotify()`, `showTimeNotification()`, `typeExpandedMessage()`
+- **Screen management:** `showQuestionScreen()`, `smoothTransition()`
+- **Chat system:** `initChatStory()`, `addMessage()`, `showOptions()`
+- **Effects:** `createConfetti()`, `createHeartBurst()`
+- **Secret:** `detectShake()`, `typeMessage()`
 
 **5. Data Structure (Chat story)**
 ```javascript
@@ -558,6 +844,21 @@ const chatStory = {
         // ... 21 steps total
     ]
 }
+```
+
+**6. Time-Based Notification Messages**
+```javascript
+// 30 sleep messages (11:30 PM - 4 AM)
+const sleepMessages = [
+    "yo it's late... maybe get some sleep?",
+    // ... 29 more
+];
+
+// 10 morning messages (7 AM - 9 AM)
+const morningMessages = [
+    "yoo morning! you're up early",
+    // ... 9 more
+];
 ```
 
 ### CSS Architecture
@@ -580,6 +881,7 @@ const chatStory = {
 - Screens
 - Buttons
 - Messages
+- Notifications (new)
 - Overlays
 - Animations
 
@@ -646,6 +948,7 @@ Pacifico       - Display titles (playful)
 Quicksand      - Body text (clean, modern)
 Great Vibes    - Cursive headings (elegant)
 Dancing Script - Signatures/special text
+Courier New    - Version number (monospace)
 ```
 
 **Font Sizes:**
@@ -654,6 +957,7 @@ Dancing Script - Signatures/special text
 2rem    - Section headers
 1.3rem  - Body text
 1rem    - Small text
+0.75rem - Version/footer text
 ```
 
 **Font Weights:**
@@ -685,6 +989,7 @@ Dancing Script - Signatures/special text
 **Consistency:**
 - Buttons: 50px (fully rounded)
 - Cards: 30px (rounded)
+- Notifications: 20px (rounded)
 - Chat window: 35px
 - Message bubbles: 18px (bottom corners 6px)
 
@@ -738,6 +1043,14 @@ Strong:  0 30px 80px rgba(0, 0, 0, 0.3)
 > "do you like me?
 > (like as a person, not weird or anything 👀)"
 
+**Notification Messages:**
+> Sleep: "yo it's late... maybe get some sleep?"
+> Morning: "yoo morning! you're up early"
+
+**Expanded Notification:**
+> Night: "good night noor ❤️✨"
+> Morning: "have a great day noor ❤️☀️"
+
 **Secret Message Core:**
 > "talking to you is genuinely easy. like it just flows...
 > you're literally the first notification i check in the morning...
@@ -760,19 +1073,19 @@ Strong:  0 30px 80px rgba(0, 0, 0, 0.3)
 
 **Step 0:** "wait you actually clicked yes?"
 **Step 2:** "okay fr?? 👀"
-**Step 3:** "HATT you really just played me like that 💀"
+**Step 3:** "HATT you really just played me like that 👀"
 **Step 6:** "bet quick question tho"
 **Step 7:** "\"maybe\" isn't an answer bro 😭"
-**Step 8:** "BRO don't do that 💀"
+**Step 8:** "BRO don't do that 👀"
 **Step 9:** "damn aight i respect the honesty ig 🥀"
 **Step 11:** "me or White Coat Man? 👀"
 **Step 15:** "AYEEE 😭 #ProudGay moment fr"
-**Step 16:** "i KNEW it 💀 he really got me beat huh"
+**Step 16:** "i KNEW it 👀 he really got me beat huh"
 **Step 17:** "idk bro i panicked 😭 forget i said anything lmao"
 **Step 18:** "ayee that's what i like to hear fr"
-**Step 19:** "ANNOYING??? 💀 nah you're mean but lowkey fair 😂"
+**Step 19:** "ANNOYING??? 👀 nah you're mean but lowkey fair 😂"
 **Step 20:** "yeah obv just friends lol #ProudGay fr 🏳️‍🌈"
-**Step 21:** "\"sure\" 💀 most unenthusiastic answer ever i'll take it tho 😌"
+**Step 21:** "\"sure\" 👀 most unenthusiastic answer ever i'll take it tho 😌"
 
 ---
 
@@ -780,7 +1093,17 @@ Strong:  0 30px 80px rgba(0, 0, 0, 0.3)
 
 ### Easy Updates (1-2 hours)
 
-#### 1. Daily Compliment Feature
+#### 1. More Notification Messages
+**What:** Expand to 60 sleep messages, 20 morning messages
+**How:** Just add more strings to the arrays
+**Impact:** More variety, stays fresh longer
+
+#### 2. Afternoon Check-in (New time slot)
+**What:** Add 12 PM - 3 PM notification
+**Messages:** "lunch break vibes", "hope your day's going well", etc.
+**How:** Add another time check in `checkTimeAndNotify()`
+
+#### 3. Daily Compliment Feature
 **What:** Random compliment changes each day
 **How:** Use date to seed random selection
 ```javascript
@@ -801,9 +1124,9 @@ function getDailyCompliment() {
 }
 ```
 
-**Where to add:** Small popup on home screen or new page
+**Where to add:** New notification type or secret message variation
 
-#### 2. Visit Counter
+#### 4. Visit Counter
 **What:** Track how many times she's visited
 **How:** Use localStorage
 ```javascript
@@ -817,7 +1140,7 @@ if (visits === 10) {
 }
 ```
 
-#### 3. Easter Egg - Triple Click Logo
+#### 5. Easter Egg - Triple Click Logo
 **What:** Hidden animation on triple-clicking title
 **How:** Track clicks within timeframe
 ```javascript
@@ -839,7 +1162,7 @@ title.addEventListener('click', () => {
 });
 ```
 
-#### 4. Time-Based Greetings
+#### 6. Time-Based Greetings on Home Screen
 **What:** Different message based on time of day
 **How:** Check current hour
 ```javascript
@@ -853,7 +1176,7 @@ function getGreeting() {
 }
 ```
 
-#### 5. Last Visit Tracker
+#### 7. Last Visit Tracker
 **What:** "Welcome back! Last visit was X days ago"
 **How:** localStorage with timestamp
 ```javascript
@@ -1029,7 +1352,7 @@ const timeCapsules = [
 - 10/10: "You literally know me better than I know myself 😭"
 - 7-9: "Pretty good! You pay attention 😌"
 - 4-6: "Decent but you could do better 😏"
-- 0-3: "Bro we need to talk more 💀"
+- 0-3: "Bro we need to talk more 👀"
 
 #### 5. Journaling Feature
 **What:** Private journal just for her
@@ -1530,9 +1853,10 @@ jobs:
 - Preserve what made her love it
 
 ✅ **Document changes**
-- Add version numbers
+- Update SITE_VERSION in script.js
 - Track what you changed
 - Keep old versions backed up
+- Update this documentation
 
 ✅ **Surprise her**
 - Don't announce updates
@@ -1568,7 +1892,47 @@ jobs:
 
 ---
 
-## 🗂️ VERSION HISTORY
+## 📖 VERSION HISTORY
+
+### v1.1 - Time-Based Notifications (Feb 2026)
+**Added:**
+- Time-based notification system
+- 30 sleep reminder messages (11:30 PM - 4 AM)
+- 10 morning greeting messages (7 AM - 9 AM)
+- Expandable notification with typing animation
+- Custom notification sound support (mp3)
+- Notification shows on question page
+- Top-to-bottom slide animation (like phone)
+- Random expanded messages with pfp
+- Version tracking system in footer
+- Version number linked to JS file
+
+**Changed:**
+- Notification triggers after user interaction (sound works)
+- Messages rotate based on date (same message all day)
+- Updated file structure documentation
+- Updated line number references
+
+**Fixed:**
+- Emoji encoding issues in JavaScript
+- Morning notification time logic
+- Notification animation direction
+- Removed duplicate header in expanded view
+
+**Files Modified:**
+- index.html (~260 lines, +20 from v1.0)
+- style.css (~2300 lines, +190 from v1.0)
+- script.js (~1700 lines, +200 from v1.0)
+
+**Testing:**
+- ✅ Desktop Chrome
+- ✅ Mobile Safari
+- ✅ All transitions working
+- ✅ Sound plays correctly
+- ✅ Notifications display properly
+- ✅ Version tracking functional
+
+---
 
 ### v1.0 - Launch (Feb 2026)
 - Initial release
@@ -1600,9 +1964,32 @@ jobs:
 
 ---
 
-## 📞 TECHNICAL SUPPORT
+## 🔧 TECHNICAL SUPPORT
 
 ### Common Issues & Fixes
+
+#### Issue: Time-based notification not showing
+**Cause:** Time range might be outside current time
+**Fix:** Check time ranges in `checkTimeAndNotify()` function
+```javascript
+// Verify these values match your desired times:
+const isLateNight = (currentMinutes >= 1410) || (currentMinutes < 240);
+const isEarlyMorning = (currentMinutes >= 420 && currentMinutes < 540);
+```
+
+#### Issue: Notification sound not playing
+**Cause:** Browser autoplay policy or wrong file path
+**Fix:** 
+1. Verify mp3 file is in stickers folder
+2. Check file path in index.html
+3. Ensure user clicked something before notification shows
+
+#### Issue: Version number not updating
+**Cause:** Browser cache or JS not loading
+**Fix:** 
+1. Hard refresh (Ctrl+Shift+R)
+2. Clear cache
+3. Verify SITE_VERSION in script.js is updated
 
 #### Issue: Shake detection not working
 **Cause:** iOS permission not granted
@@ -1658,6 +2045,13 @@ setTimeout(() => {
 }
 ```
 
+#### Issue: Notification expanded message not typing
+**Cause:** Function not defined or wrong selector
+**Fix:** Verify `typeExpandedMessage()` function exists and selector is correct
+```javascript
+const msgElement = document.querySelector('.expanded-msg-typing');
+```
+
 ### Browser Compatibility
 
 **Fully tested:**
@@ -1706,21 +2100,21 @@ If you're an AI helping with updates, here's what you need to know:
 ### Text Style
 - Lowercase casual
 - Use: "fr", "ngl", "lowkey", "bet", "lol"
-- Don't use: "hazyyy" (used to, but removed)
+- Don't use: "hazyyy" (used to, but removed from JS)
 - Keep it natural, not AI-sounding
-- Short sentences, emoji sparingly
+- Short sentences, emoji sparingly (only in HTML, not JS)
 
 ### When Adding Features
 1. Check if it fits the vibe
 2. Keep it personal
 3. Test thoroughly
 4. Update this documentation
-5. Increment version number
+5. Increment version number (SITE_VERSION in script.js)
 
 ### Files to Update
 - `index.html` - Structure changes
 - `style.css` - Visual changes
-- `script.js` - Functionality changes
+- `script.js` - Functionality changes + version bump
 - `DOCUMENTATION.md` - This file
 
 ---
@@ -1730,7 +2124,7 @@ If you're an AI helping with updates, here's what you need to know:
 When making updates, document like this:
 
 ```markdown
-## v1.1 - [Feature Name] (Date)
+## v1.2 - [Feature Name] (Date)
 
 ### Added
 - New feature X
@@ -1750,7 +2144,7 @@ When making updates, document like this:
 ### Files Modified
 - index.html (lines 50-60)
 - style.css (lines 100-150)
-- script.js (lines 200-250)
+- script.js (lines 200-250, VERSION updated to 1.2)
 
 ### Testing
 - ✅ Desktop Chrome
@@ -1765,30 +2159,46 @@ When making updates, document like this:
 ### Important Line Numbers (Approximate)
 
 **index.html:**
+- Line 19-34: Time notification HTML
 - Line 102-106: Home page text
 - Line 116-133: Question screen
 - Line 180-219: Rating screen
 - Line 25-60: Secret message screen
+- Line 233: Version display
 
 **style.css:**
 - Line 1-80: CSS Variables
 - Line 101-145: Screen transitions
 - Line 500-600: Chat styles
 - Line 1100-1400: Secret message styles
+- Line 2147-2300: Notification styles (new)
+- Line 700: Version styling (new)
 - Line 2061-2100: Mobile responsive
 
 **script.js:**
+- Line 1-2: Site version constant (UPDATE THIS)
+- Line 24-30: Version display update (new)
+- Line 34-80: Notification messages (new)
+- Line 83-113: Time check & notification logic (new)
+- Line 116-180: Notification display & expand (new)
 - Line 55-344: Chat story data
 - Line 19-43: Smooth transition function
 - Line 388-430: YES button handler
+- Line 520-530: showQuestionScreen with notification (modified)
 - Line 850-930: NO button handler
 - Line 1165-1400: Secret message system
 
 ### Key Functions
 
+**Version & Notifications:**
+- `SITE_VERSION` - Version constant (line 2)
+- `checkTimeAndNotify()` - Check time and show notification
+- `showTimeNotification()` - Display notification
+- `typeExpandedMessage()` - Typing animation for expanded view
+
 **Screen Management:**
 - `smoothTransition(from, to, callback)`
-- `showQuestionScreen()`
+- `showQuestionScreen()` - Now triggers notification
 
 **Chat System:**
 - `initChatStory()`
@@ -1810,6 +2220,14 @@ When making updates, document like this:
 - `.screen.active` - Visible
 - `.screen.fade-out` - Leaving
 
+**Notifications (new):**
+- `.time-notification` - Notification popup
+- `.time-notification.expanded` - Expanded state
+- `.notification-content` - Main container
+- `.notification-expanded` - Expanded content area
+- `.expanded-msg-typing` - Typing animation target
+- `.cursor-blink` - Blinking cursor
+
 **Chat:**
 - `.message-bubble` - Message
 - `.message-zurayn` - Left (pink)
@@ -1820,13 +2238,16 @@ When making updates, document like this:
 - `.yes-btn` - Green YES
 - `.no-btn` - Red NO (moving)
 
+**Version:**
+- `.site-version` - Version display in footer
+
 ---
 
-## 💝 FINAL NOTES
+## 💡 FINAL NOTES
 
 This website is more than code - it's a gesture. Every detail was crafted to feel personal, natural, and meaningful.
 
-The smooth transitions, the casual text, the inside jokes, the secret message - all of it works together to create a genuine experience that Noor loved.
+The smooth transitions, the casual text, the inside jokes, the secret message, the time-based notifications - all of it works together to create a genuine experience that Noor loved.
 
 When updating, remember:
 - It's about the feelings, not the features
@@ -1840,7 +2261,7 @@ Keep that energy in everything you add.
 
 ---
 
-**Last Updated:** February 2026 (v1.0)
+**Last Updated:** February 2026 (v1.1)
 **Created By:** Zurayn
 **Made For:** Noor 💙
 **Status:** Production / Live / Loved
@@ -1852,7 +2273,7 @@ Keep that energy in everything you add.
 This documentation is meant to be uploaded alongside the website files so that any AI assistant (or future you) can understand the complete context and help with updates.
 
 **Files to upload together:**
-1. `index.html` - The website
+1. `index.html` - The website structure
 2. `style.css` - The styling
 3. `script.js` - The functionality
 4. `DOCUMENTATION.md` - This file

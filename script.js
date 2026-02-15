@@ -1,3 +1,5 @@
+// Site Version
+const SITE_VERSION = "1.1";
 // script.js
 document.addEventListener('DOMContentLoaded', function() {
     // DOM Elements
@@ -22,12 +24,267 @@ document.addEventListener('DOMContentLoaded', function() {
     let noButtonMoveInterval;
     // Initialize the page
     initPage();
+
+    // Update version display
+setTimeout(() => {
+    const versionEl = document.getElementById('site-version');
+    if (versionEl && typeof SITE_VERSION !== 'undefined') {
+        versionEl.textContent = `v${SITE_VERSION}`;
+    }
+}, 100);
     
     // Event Listeners
     startBtn.addEventListener('click', showQuestionScreen);
     yesBtn.addEventListener('click', handleYesClick);
     noBtn.addEventListener('click', handleNoClick);
     restartBtn.addEventListener('click', restartExperience);
+
+    // ============ TIME-BASED NOTIFICATION SYSTEM ============
+    
+    // Sleep messages (11:30 PM - 4 AM) - 30 rotating messages
+    const sleepMessages = [
+        "yo it's late... maybe get some sleep? 🙂",
+        "bro it's literally past midnight, go sleep lol",
+        "noor... sleep... fr 😾",
+        "why are you still up hazyyy 😾",
+        "blehh go to bed already -_-",
+        "cyaa... it's so late, sleep pleasee 😭",
+        "sleep > scrolling rn, trust me 😔",
+        "okay but like... sleep tho? 🤔",
+        "you need sleep more than you need this site 😭",
+        "ngl you should probably sleep fr",
+        "hatt! stop scrolling and sleep",
+        "your sleep schedule is crying rn 😭",
+        "go sleep or i'm gonna be annoying tomorrow 😾",
+        "it's late late... like actually late, sleep rn",
+        "sleep is calling your name hazyyy ✌️",
+        "lowkey worried about your sleep schedule 😔",
+        "bestie... bed. now. lol i guess u didnt saw that",
+        "zurayn want you to sleep rn",
+        "even i'm gonna sleep soon (if not already), you should too",
+        "the website will still be here tomorrow lol ✌️",
+        "okay last reminder... go SLEEP",
+        "bro your eyeballs need rest fr",
+        "sleep deprivation isn't kool hazyyy",
+        "bet you're tired... js sleep already",
+        "i made this site sweet but sleep is sweeter rn ❤️",
+        "cyaa don't make me spam you to sleep",
+        "it's giving insomnia... pls sleep 😭",
+        "go rest please, for me? 👉👈",
+        "sleep >> being awake at this hour 😾",
+        "aight i'm not asking anymore... SLEEP 😾"
+    ];
+
+    // Morning messages (7 AM - 9 AM) - 10 rotating messages
+    const morningMessages = [
+        "yoo morning! you're up early ✌️",
+        "ayee look at you waking up early ✨",
+        "morning noor! early bird energy fr",
+        "dayumm you actually woke up early, proud of you ❤️",
+        "good morning! this is kinda rare lol 😂",
+        "morning! love that you're up early today ❤️",
+        "yoo early morning vibes, i like it ❤️",
+        "good morning hazyyy! productive day incoming? 😉",
+        "morning! you're up before noon, that's W ✌️",
+        "ayee morning! early riser arc unlocked ✌️"
+    ];
+
+    // Get message based on day of month (for rotation)
+    function getRotatingMessage(messagesArray) {
+        const today = new Date().getDate(); // 1-31
+        const index = (today - 1) % messagesArray.length;
+        return messagesArray[index];
+    }
+
+    // Check time and show appropriate notification
+    function checkTimeAndNotify() {
+        const now = new Date();
+        const hours = now.getHours();
+        const minutes = now.getMinutes();
+        
+        // Convert to minutes since midnight for easier comparison
+        const currentMinutes = hours * 60 + minutes;
+        
+        // Late night: 11:30 PM (23:30) to 4:00 AM (4:00)
+        // 23:30 = 1410 minutes, 4:00 = 240 minutes
+        const isLateNight = (currentMinutes >= 1410) || (currentMinutes < 240);
+        
+        // Early morning: 7:00 AM to 9:00 AM
+        // 6:00 = 360 minutes, 9:00 = 540 minutes
+        const isEarlyMorning = (currentMinutes >= 360 && currentMinutes < 540);
+        
+        if (isLateNight) {
+            const message = getRotatingMessage(sleepMessages);
+            showTimeNotification(message);
+        } else if (isEarlyMorning) {
+            const message = getRotatingMessage(morningMessages);
+            showTimeNotification(message);
+        }
+    }
+
+    // Show notification with animation and sound
+    // Show notification with animation and sound
+function showTimeNotification(message) {
+    const notification = document.getElementById('time-notification');
+    const messageEl = document.getElementById('notification-message');
+    const closeBtn = document.getElementById('notification-close-btn');
+    const sound = document.getElementById('notification-sound');
+    
+    if (!notification || !messageEl) return;
+    
+    // Set message
+    messageEl.innerHTML = `<p>${message}</p>`;
+    
+    // Show notification
+    notification.classList.remove('hidden');
+    
+    // Play notification sound (will work since user clicked)
+    if (sound) {
+        sound.volume = 0.3;
+        sound.play().catch(err => {
+            console.log('Sound play prevented:', err);
+        });
+    }
+    
+    // Auto-hide after 10 seconds
+    let autoHideTimer = setTimeout(() => {
+        hideTimeNotification();
+    }, 10000);
+    
+    // Expanded messages based on time
+    const expandedMessages = {
+        night: [
+            "good night noor ❤️✨",
+            "good night bbg ❤️🎀",
+            "good night darling ❤️✌️"
+        ],
+        morning: [
+            "have a great day noor ❤️✌️",
+            "morning bbg ❤️🌹",
+            "u woke up early, it's a win for me ❤️"
+        ]
+    };
+    
+    // Determine if it's night or morning
+    // Determine if it's night or morning (match the same logic as checkTimeAndNotify)
+    const now = new Date();
+    const hours = now.getHours();
+    const minutes = now.getMinutes();
+    const currentMinutes = hours * 60 + minutes;
+
+    const isNight = (currentMinutes >= 1410) || (currentMinutes < 240);
+    const messages = isNight ? expandedMessages.night : expandedMessages.morning;
+    const expandedMessage = messages[Math.floor(Math.random() * messages.length)];
+    
+    // Click to expand
+    // Click to expand
+notification.onclick = function(e) {
+    if (e.target !== closeBtn && !closeBtn.contains(e.target)) {
+        // Prevent auto-hide
+        clearTimeout(autoHideTimer);
+        
+        // Expand notification
+        notification.classList.add('expanded');
+        
+        // Determine if it's night or morning
+        const hours = new Date().getHours();
+        const isNight = hours >= 23 || hours < 4;
+        const messages = isNight ? 
+            ["good night noor ❤️✨", "good night bbg 💖🎀", "good night darling ❤️✌️"] :
+            ["have a great day noor ❤️✌️", "morning bbg ❤️🌹", "u woke up early, its a win for me❤️😭"];
+        const expandedMessage = messages[Math.floor(Math.random() * messages.length)];
+        
+        // Add expanded content with typing animation
+        const expandedContent = document.createElement('div');
+        expandedContent.className = 'notification-expanded';
+        expandedContent.innerHTML = `
+            <div class="expanded-message-simple">
+                <p class="expanded-msg-typing"></p>
+            </div>
+        `;
+        
+        // Check if not already expanded
+        if (!notification.querySelector('.notification-expanded')) {
+            notification.querySelector('.notification-content').appendChild(expandedContent);
+            
+            // Start typing animation
+            setTimeout(() => {
+                typeExpandedMessage(expandedMessage);
+            }, 200);
+        }
+        
+        // Reset timer for expanded view
+        autoHideTimer = setTimeout(() => {
+            hideTimeNotification();
+        }, 15000); // 15 seconds for expanded view
+    }
+};
+
+// Close button
+closeBtn.onclick = function(e) {
+    e.stopPropagation();
+    clearTimeout(autoHideTimer);
+    hideTimeNotification();
+};
+
+// Typing animation function for expanded message
+function typeExpandedMessage(message) {
+    const msgElement = document.querySelector('.expanded-msg-typing');
+    if (!msgElement) return;
+    
+    let index = 0;
+    msgElement.textContent = '';
+    
+    function typeChar() {
+        if (index < message.length) {
+            msgElement.textContent += message[index];
+            index++;
+            
+            // Variable speed for natural feel
+            const speed = message[index] === ' ' ? 30 : (50 + Math.random() * 30);
+            setTimeout(typeChar, speed);
+        } else {
+            // Add cursor blink effect at end
+            msgElement.innerHTML += '<span class="cursor-blink">|</span>';
+            
+            // Remove cursor after 2 seconds
+            setTimeout(() => {
+                const cursor = msgElement.querySelector('.cursor-blink');
+                if (cursor) cursor.remove();
+            }, 2000);
+        }
+    }
+    
+    typeChar();
+}
+}
+
+    // Hide notification with slide-out animation
+function hideTimeNotification() {
+    const notification = document.getElementById('time-notification');
+    if (!notification) return;
+    
+    notification.style.animation = 'slideOutUp 0.4s ease forwards';
+    
+    setTimeout(() => {
+        notification.classList.add('hidden');
+        notification.classList.remove('expanded');
+        notification.style.animation = '';
+        
+        // Remove expanded content if exists
+        const expandedContent = notification.querySelector('.notification-expanded');
+        if (expandedContent) {
+            expandedContent.remove();
+        }
+    }, 400);
+}
+
+    // Check on page load
+   // Check time when question screen shows (user already clicked, sound will work)
+// Removed from page load - will be called from showQuestionScreen()
+
+    // ============ END OF NOTIFICATION SYSTEM ============
+
 
     // === CHAT SYSTEM VARIABLES ===
     let chatHistory = [];
@@ -59,7 +316,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         value: "positive"
                     },
                     {
-                        text: "Nah i'm trolling 😂",
+                        text: "Nah i'm trolling",
                         nextStep: 3,
                         value: "negative"
                     }
@@ -71,7 +328,7 @@ document.addEventListener('DOMContentLoaded', function() {
             {
                 id: 2,
                 type: "zurayn",
-                message: "okay fr?? 👀",
+                message: "okay fr??",
                 delay: 400,
                 typingSpeed: 35,
                 nextStep: 4
@@ -82,7 +339,7 @@ document.addEventListener('DOMContentLoaded', function() {
             {
                 id: 3,
                 type: "zurayn",
-                message: "HATT<br>you really js played me like that 😔",
+                message: "HATT<br>you really js played me like that",
                 delay: 500,
                 typingSpeed: 40,
                 nextStep: 5
@@ -99,7 +356,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         value: "serious"
                     },
                     {
-                        text: "idk maybe 😏",
+                        text: "idk maybe",
                         nextStep: 7,
                         value: "playful"
                     }
@@ -138,7 +395,7 @@ document.addEventListener('DOMContentLoaded', function() {
             {
                 id: 7,
                 type: "zurayn",
-                message: "\"maybe\" isn't an answer bro 😭<br>you at least like talking to me right?",
+                message: "\"maybe\" isn't an answer bro<br>you at least like talking to me right?",
                 delay: 500,
                 typingSpeed: 45,
                 nextStep: 13
@@ -148,7 +405,7 @@ document.addEventListener('DOMContentLoaded', function() {
             {
                 id: 8,
                 type: "zurayn",
-                message: "noob don't do that 😭<br>so you DO like me then? 👉👈",
+                message: "noob don't do that<br>so you DO like me then?",
                 delay: 500,
                 typingSpeed: 40,
                 nextStep: 14
@@ -158,7 +415,7 @@ document.addEventListener('DOMContentLoaded', function() {
             {
                 id: 9,
                 type: "zurayn",
-                message: "daymm alright<br>i respect the honesty ig 🥀<br><br>at least admit the site's good tho",
+                message: "daymm alright<br>i respect the honesty ig<br><br>at least admit the site's good tho",
                 delay: 600,
                 typingSpeed: 50
                 // Ends here
@@ -186,7 +443,7 @@ document.addEventListener('DOMContentLoaded', function() {
             {
                 id: 11,
                 type: "zurayn",
-                message: "Me or White Coat Man? 👀",
+                message: "Me or White Coat Man?",
                 delay: 300,
                 typingSpeed: 35,
                 nextStep: 12
@@ -198,17 +455,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 type: "options",
                 options: [
                     {
-                        text: "you 🐣❤️",
+                        text: "you",
                         nextStep: 15,
                         value: "you_win"
                     },
                     {
-                        text: "White Coat Man 🫢🥼",
+                        text: "White Coat Man",
                         nextStep: 16,
                         value: "wcm_wins"
                     },
                     {
-                        text: "why would you ask that 😭",
+                        text: "why would you ask that",
                         nextStep: 17,
                         value: "confused"
                     }
@@ -255,7 +512,7 @@ document.addEventListener('DOMContentLoaded', function() {
             {
                 id: 15,
                 type: "zurayn",
-                message: "YESHHH 😭<br>#BailcharaOnTop moment fr",
+                message: "YESHHH<br>#BailcharaOnTop moment fr",
                 delay: 300,
                 typingSpeed: 35,
                 special: function() {
@@ -270,7 +527,7 @@ document.addEventListener('DOMContentLoaded', function() {
             {
                 id: 16,
                 type: "zurayn",
-                message: "i KNEW it 😔<br>he really got me beat huh 😾<br><br>nah jk idc fr",
+                message: "i KNEW it<br>he really got me beat huh<br><br>nah jk idc fr",
                 delay: 500,
                 typingSpeed: 40
                 // Ends here
@@ -280,7 +537,7 @@ document.addEventListener('DOMContentLoaded', function() {
             {
                 id: 17,
                 type: "zurayn",
-                message: "idk i panicked 😭<br>forget i said anything lmao",
+                message: "idk i panicked<br>forget i said anything lmao",
                 delay: 400,
                 typingSpeed: 40
                 // Ends here
@@ -300,7 +557,7 @@ document.addEventListener('DOMContentLoaded', function() {
             {
                 id: 19,
                 type: "zurayn",
-                message: "CRINGE??? 🥀<br>blehh you're mean<br><br>but fair ig 😂",
+                message: "CRINGE???<br>blehh you're mean<br><br>but fair ig",
                 delay: 400,
                 typingSpeed: 40
                 // Ends here
@@ -310,7 +567,7 @@ document.addEventListener('DOMContentLoaded', function() {
             {
                 id: 20,
                 type: "zurayn",
-                message: "yeah obv js friends lol<br>#ProudGay 🏳️‍🌈",
+                message: "yeah obv js friends lol<br>#ProudGay fr",
                 delay: 300,
                 typingSpeed: 40
                 // Ends here
@@ -320,7 +577,7 @@ document.addEventListener('DOMContentLoaded', function() {
             {
                 id: 21,
                 type: "zurayn",
-                message: "\"sure\" 💀<br>most unenthusiastic answer ever<br><br>i'll take it as a compliment",
+                message: "\"sure\"<br>most unenthusiastic answer ever<br><br>i'll take it as a compliment",
                 delay: 400,
                 typingSpeed: 40
                 // Ends here
@@ -361,13 +618,18 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Show the main question screen
     function showQuestionScreen() {
-        introScreen.classList.remove('active');
-        questionScreen.classList.add('active');
-        
-        // Reset state
-        resetNoButton();
-        responseText.textContent = "Js pick one noob ";
-    }
+    introScreen.classList.remove('active');
+    questionScreen.classList.add('active');
+    
+    // Reset state
+    resetNoButton();
+    responseText.textContent = "Js pick one noob ";
+    
+    // Check time and show notification (sound will work now since user clicked)
+    setTimeout(() => {
+        checkTimeAndNotify();
+    }, 1500);
+   }
     
     // Handle YES button click
     function handleYesClick() {
@@ -387,11 +649,11 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         // Update response text before transition
         const responses = [
-            "Yay! I knew it! 😼❤️",
-            "wait fr?? 😭",
-            "White Coat Man in shambles rn 😂",
-            "yo... let's go ✌️",
-            "Hatt! For real? 😭❤️"
+            "Yay! I knew it!",
+            "wait fr??",
+            "White Coat Man in shambles rn",
+            "yo... let's go",
+            "Hatt! For real?"
         ];
         responseText.textContent = responses[Math.floor(Math.random() * responses.length)];
         
@@ -703,7 +965,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             const referenceDiv = document.createElement('div');
             referenceDiv.className = 'message-bubble system-message no-count-reference';
-            referenceDiv.innerHTML = `(After ${originalNoClickCount} NOs, finally got that YES! 😂)`;
+            referenceDiv.innerHTML = `(After ${originalNoClickCount} NOs, finally got that YES!)`;
             
             chatDisplay.appendChild(referenceDiv);
             
@@ -778,13 +1040,13 @@ document.addEventListener('DOMContentLoaded', function() {
             finalMessage.textContent = "okay now rate this whole thing (be honest tho)";
             note.textContent = "(giving me 5 stars after saying i'm better than wcm would be kinda iconic ngl)";
         } else if (wcmWinsChoice) {
-            finalMessage.textContent = "alright rate the site at least 😭";
+            finalMessage.textContent = "alright rate the site at least";
             note.textContent = "(you already said wcm > me so throw me a bone here)";
         } else if (cringe) {
             finalMessage.textContent = "you called me cringe but rate this anyway lol";
-            note.textContent = "(i know you're gonna give me 3 stars 💀)";
+            note.textContent = "(i know you're gonna give me 3 stars)";
         } else if (originalNoClickCount > 5) {
-            finalMessage.textContent = "NOW rate my coding after clicking NO " + originalNoClickCount + " times 😾";
+            finalMessage.textContent = "NOW rate my coding after clicking NO " + originalNoClickCount + " times";
             note.textContent = "(yeah i counted. pick all 5 to apologize)";
         } else {
             finalMessage.textContent = "alright rate this whole experience";
@@ -839,12 +1101,12 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Different responses based on click count
         const sadResponses = [
-            "Hatt! Think again 😾",
-            "You can't do this to me 😔",
-            "Hurr! But why?? 😭",
-            "Blehh... that's harsh hazyyy 🥀",
-            "cyaa... you're breaking my heart 💔",
-            "damn okay i see how it is 🥀"
+            "Hatt! Think again",
+            "You can't do this to me",
+            "Hurr! But why??",
+            "Blehh... that's harsh hazyyy",
+            "cyaa... you're breaking my heart",
+            "damn okay i see how it is"
         ];
         
         const randomResponse = sadResponses[Math.floor(Math.random() * sadResponses.length)];
@@ -1037,11 +1299,11 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Show funny message based on rating
             const messages = [
-                "Only {count}? Hatt! 😡",
-                "{count} stars? Blehh... 😾",
-                "{count}? Cyaa... you're harsh hazyyy 🥀",
-                "{count} stars? I'll take it! 😼",
-                "All {count}! Yeshh! My bbg energy! ✌️"
+                "Only {count}? Hatt!",
+                "{count} stars? Blehh...",
+                "{count}? Cyaa... you're harsh hazyyy",
+                "{count} stars? I'll take it!",
+                "All {count}! Yeshh! My bbg energy!"
             ];
             
             const selectedMessage = messages[index];
@@ -1064,11 +1326,11 @@ document.addEventListener('DOMContentLoaded', function() {
     setInterval(() => {
         if (questionScreen.classList.contains('active')) {
             const teasers = [
-                "White Coat Man is watching... 👀",
-                "Remember... we r proud gay 🤣",
-                "Bailchara on top ✌️",
-                "No pressure hazyyy... 🎀",
-                "Just choose... it's not that deep 😂"
+                "White Coat Man is watching...",
+                "Remember... we r proud gay",
+                "Bailchara on top",
+                "No pressure hazyyy...",
+                "Just choose... it's not that deep"
             ];
             
             // Only change if user hasn't interacted recently
@@ -1155,11 +1417,10 @@ our chats aren't planned or anything. they just happen naturally and somehow the
 you're literally the first notification i check in the morning and the last person i talk to before sleeping. and that lowkey means more to me than i probably show.
 this whole site, all the jokes, the chaos... it's just my weird way of saying you matter to me. like actually matter. 
 
-Sometimes i wonder if we’re pretending not to notice something.
+Sometimes i wonder if we're pretending not to notice something.
 You're a really good friend and i'm grateful you're in my life.
 
-Okay stopping here before this gets too deep lol ✌️
-`;
+Okay stopping here before this gets too deep lol`;
 
         // Create romantic background effects
         function createSecretBackground() {
@@ -1519,7 +1780,7 @@ Okay stopping here before this gets too deep lol ✌️
                         hintText.innerHTML = "Press the <strong>'S' key</strong> for a secret message from Zurayn...";
                     }
                     if (hintSub) {
-                        hintSub.innerHTML = "(Or just pretend to shake your laptop 😂)";
+                        hintSub.innerHTML = "(Or just pretend to shake your laptop)";
                     }
                 }
 
