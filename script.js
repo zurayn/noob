@@ -82,11 +82,11 @@ setTimeout(() => {
         "morning noor! early bird energy fr",
         "dayumm you actually woke up early, proud of you ❤️",
         "good morning! this is kinda rare lol 😂",
-        "morning! love that you're up early today ❤️",
+        "morning! love that u r up early today ❤️",
         "yoo early morning vibes, i like it ❤️",
         "good morning hazyyy! productive day incoming? 😉",
         "morning! you're up before noon, that's W ✌️",
-        "ayee morning! early riser arc unlocked ✌️"
+        "ayee morning! early riser arc unlocked 🔥😂"
     ];
 
     // Get message based on day of month (for rotation)
@@ -157,11 +157,15 @@ function showTimeNotification(message) {
             "good night noor ❤️✨",
             "good night bbg ❤️🎀",
             "good night darling ❤️✌️"
+            "good night bestie ❤️🫢"
+            "good night ______ ❤️🥰 (haan wahi jo soch rhi)"
         ],
         morning: [
             "have a great day noor ❤️✌️",
             "morning bbg ❤️🌹",
-            "u woke up early, it's a win for me ❤️"
+            "u woke up early, it's a win for me ❤️ 😭"
+            "either i’m missing u rn or dreaming about you. either way… text me ✌️"
+            "good morning noor <3"
         ]
     };
     
@@ -190,8 +194,8 @@ notification.onclick = function(e) {
         const hours = new Date().getHours();
         const isNight = hours >= 23 || hours < 4;
         const messages = isNight ? 
-            ["good night noor ❤️✨", "good night bbg 💖🎀", "good night darling ❤️✌️"] :
-            ["have a great day noor ❤️✌️", "morning bbg ❤️🌹", "u woke up early, its a win for me❤️😭"];
+            ["good night noor ❤️✨", "good night bbg 💖🎀", "good night darling ❤️✌️", "good night bestie ❤️🫢", "good night ______ ❤️🥰 (haan wahi jo soch rhi)"] :
+            ["have a great day noor ❤️✌️", "morning bbg ❤️🌹", "either i’m missing u rn or dreaming about you. either way… text me ✌️", "good morning noor <3", "u woke up early, its a win for me❤️😭"];
         const expandedMessage = messages[Math.floor(Math.random() * messages.length)];
         
         // Add expanded content with typing animation
