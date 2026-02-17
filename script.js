@@ -157,15 +157,11 @@ function showTimeNotification(message) {
             "good night noor ❤️✨",
             "good night bbg ❤️🎀",
             "good night darling ❤️✌️"
-            "good night bestie ❤️🫢"
-            "good night ______ ❤️🥰 (haan wahi jo soch rhi)"
         ],
         morning: [
             "have a great day noor ❤️✌️",
             "morning bbg ❤️🌹",
             "u woke up early, it's a win for me ❤️ 😭"
-            "either i’m missing u rn or dreaming about you. either way… text me ✌️"
-            "good morning noor <3"
         ]
     };
     
