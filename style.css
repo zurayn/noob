@@ -2419,6 +2419,149 @@ body:has(#secret-screen.active) {
     }
 }
 
+/* ============ RAMADAN MUBARAK SPLASH ============ */
+
+.ramadan-splash {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: linear-gradient(180deg, #050510 0%, #0e0b2e 35%, #0a1a3a 70%, #0d1f4a 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    overflow: hidden;
+}
+
+@keyframes ramadanFadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+@keyframes ramadanFadeOut {
+    from { opacity: 1; transform: scale(1); }
+    to   { opacity: 0; transform: scale(1.04); }
+}
+
+.ramadan-splash.fade-in {
+    animation: ramadanFadeIn 1.2s ease forwards;
+}
+
+.ramadan-splash.fade-out {
+    animation: ramadanFadeOut 0.9s ease forwards;
+    pointer-events: none;
+}
+
+.ramadan-stars-container {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.rstar {
+    position: absolute;
+    background: #fff;
+    border-radius: 50%;
+    animation: starTwinkle var(--dur, 2s) ease-in-out infinite;
+    animation-delay: var(--delay, 0s);
+    opacity: 0;
+}
+
+@keyframes starTwinkle {
+    0%, 100% { opacity: 0.1; transform: scale(0.8); }
+    50%       { opacity: 0.9; transform: scale(1.2); }
+}
+
+.ramadan-moon-wrap {
+    position: relative;
+    margin-bottom: 10px;
+}
+
+.ramadan-moon {
+    font-size: 90px;
+    animation: moonFloat 4s ease-in-out infinite;
+    display: block;
+    line-height: 1;
+    filter: drop-shadow(0 0 30px rgba(255, 220, 100, 0.6));
+}
+
+.ramadan-glow {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,210,60,0.18) 0%, transparent 70%);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+}
+
+@keyframes moonFloat {
+    0%, 100% { transform: translateY(0) rotate(-5deg); }
+    50%       { transform: translateY(-14px) rotate(5deg); }
+}
+
+.ramadan-content {
+    text-align: center;
+    color: #fff;
+    margin-top: 8px;
+    animation: ramadanFadeIn 1.8s ease forwards;
+}
+
+.ramadan-title {
+    font-family: 'Pacifico', cursive;
+    font-size: 2.6rem;
+    color: #ffd770;
+    text-shadow: 0 0 20px rgba(255, 210, 60, 0.5);
+    margin-bottom: 8px;
+    letter-spacing: 1px;
+}
+
+.ramadan-name {
+    font-family: 'Quicksand', sans-serif;
+    font-size: 1.4rem;
+    color: #e0d4ff;
+    margin-bottom: 14px;
+    font-weight: 600;
+}
+
+.ramadan-msg {
+    font-family: 'Quicksand', sans-serif;
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.75);
+    margin-bottom: 6px;
+}
+
+.ramadan-sub {
+    font-family: 'Quicksand', sans-serif;
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.55);
+    font-style: italic;
+}
+
+.ramadan-tap {
+    position: absolute;
+    bottom: 32px;
+    font-family: 'Quicksand', sans-serif;
+    font-size: 0.82rem;
+    color: rgba(255,255,255,0.35);
+    animation: tapPulse 2.5s ease-in-out infinite;
+    letter-spacing: 0.5px;
+}
+
+@keyframes tapPulse {
+    0%, 100% { opacity: 0.35; }
+    50%       { opacity: 0.7; }
+}
+
+@media (max-width: 500px) {
+    .ramadan-moon { font-size: 72px; }
+    .ramadan-title { font-size: 2rem; }
+    .ramadan-name { font-size: 1.2rem; }
+}
+
 /* ============ END OF NEW CSS - THEN YOUR EXISTING MEDIA QUERY CONTINUES ============ */
 
 @media (max-width: 350px) {

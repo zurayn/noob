@@ -1,7 +1,51 @@
 // Site Version
-const SITE_VERSION = "1.1";
+const SITE_VERSION = "1.2";
 // script.js
 document.addEventListener('DOMContentLoaded', function() {
+
+// ============ RAMADAN MUBARAK SPLASH ============
+// dates: feb 17 – mar 19 2026
+(function initRamadanSplash() {
+    const splash = document.getElementById('ramadan-splash');
+    if (!splash) return;
+
+    const now = new Date();
+    const y = now.getFullYear(), m = now.getMonth() + 1, d = now.getDate();
+
+    const start = { y: 2026, m: 2, d: 17 };
+    const end   = { y: 2026, m: 3, d: 19 };
+
+    const afterStart = y > start.y || (y === start.y && m > start.m) || (y === start.y && m === start.m && d >= start.d);
+    const beforeEnd  = y < end.y   || (y === end.y   && m < end.m)   || (y === end.y   && m === end.m   && d <= end.d);
+
+    if (!afterStart || !beforeEnd) return;
+
+    splash.style.display = 'flex';
+    setTimeout(() => splash.classList.add('fade-in'), 10);
+
+    // generate stars
+    const starsEl = document.getElementById('ramadan-stars');
+    if (starsEl) {
+        for (let i = 0; i < 80; i++) {
+            const s = document.createElement('div');
+            s.className = 'rstar';
+            const size = 1 + Math.random() * 2.5;
+            s.style.cssText = `width:${size}px;height:${size}px;left:${Math.random()*100}%;top:${Math.random()*100}%;--dur:${1.5+Math.random()*3}s;--delay:${Math.random()*3}s;`;
+            starsEl.appendChild(s);
+        }
+    }
+
+    function dismiss() {
+        splash.classList.remove('fade-in');
+        splash.classList.add('fade-out');
+        setTimeout(() => splash.style.display = 'none', 900);
+    }
+
+    const t = setTimeout(dismiss, 10000); // auto dismiss after 10s
+    splash.addEventListener('click', () => { clearTimeout(t); dismiss(); }, { once: true });
+})();
+// ============ END RAMADAN SPLASH ============
+    
     // DOM Elements
     const startBtn = document.getElementById('start-btn');
     const yesBtn = document.getElementById('yes-btn');
